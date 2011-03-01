@@ -12,7 +12,11 @@
           <th>${%Build}</th>
           <th initialSortDir="up">${%Date}</th>
           <th>${%Status}</th>
-          <th><st:nbsp/></th> <!-- Badges -->
+          <th><st:nbsp/></th> <!-- Artifacts -->
+          <th><st:nbsp/></th> <!-- Changes -->
+          <th><st:nbsp/></th> <!-- Test Report -->
+          <th><st:nbsp/></th> <!-- Console output -->
+          <th><st:nbsp/></th> <!-- Rebuild button -->
         </tr>
         <!-- TODO: support gradual expansion of the list -->
         <j:forEach var="b" items="${builds}">
@@ -34,35 +38,44 @@
             <td>
               <t:buildStatusSummary build="${b}" />
             </td>
-            <td>
-              <table>
-                <tr>
-            <td> <!-- Rebuild -->
-            </td>
-            <td> <!-- Build Artifacts -->
-              <j:if test="${b.getHasArtifacts()}">
-                <a href="${rootURL}${b.url}artifact/">
-                  <img src="${imagesURL}/${subIconSize}/package.gif" title="${%Build Artifacts}" alt="${%Build Artifacts}" border="0" />
-                </a>
-              </j:if>
-            </td>
-            <td> <!-- Changes -->
-              <a href="${rootURL}${b.url}changes">
-               <img src="${imagesURL}/${subIconSize}/notepad.gif" title="${%Changes}" alt="${%Changes}" border="0" />
-              </a>
-            </td>
-            <td> <!-- Test Result -->
-              <a href="${rootURL}${b.url}testReport/">
-                <img src="${imagesURL}/${subIconSize}/clipboard.gif" title="${%Test Result}" alt="${%Test Result}" border="0" />
-              </a>
-            </td>
-            <td> <!-- Console Output -->
-              <a href="${rootURL}${b.url}console">
-                <img src="${imagesURL}/${subIconSize}/terminal.gif" title="${%Console output}" alt="${%Console output}" border="0" />
-              </a>
-            </td>
-                </tr>
-              </table>
+                  <td width="30px"> <!-- Build Artifacts -->
+                    <j:choose>
+                      <j:when test="${b.getHasArtifacts()}">
+                        <a href="${rootURL}${b.url}artifact/">
+                          <img src="${imagesURL}/${subIconSize}/package.gif" title="${%Build Artifacts}" alt="${%Build Artifacts}" border="0" />
+                        </a>
+                      </j:when>
+                      <j:otherwise>
+                        <st:nbsp/>
+                      </j:otherwise>
+                    </j:choose>
+                  </td>
+
+                  <td width="30px"> <!-- Test Result -->
+                    <j:choose>
+                      <j:when test="${b.getTestResultAction() != null}">
+                        <a href="${rootURL}${b.url}testReport/">
+                          <img src="${imagesURL}/${subIconSize}/clipboard.gif" title="${%Test Result}" alt="${%Test Result}" border="0" />
+                        </a>
+                      </j:when>
+                      <j:otherwise>
+                        <st:nbsp/>
+                      </j:otherwise>
+                    </j:choose>
+                  </td>
+
+                  <td width="30px"> <!-- Changes -->
+                    <a href="${rootURL}${b.url}changes">
+                      <img src="${imagesURL}/${subIconSize}/notepad.gif" title="${%Changes}" alt="${%Changes}" border="0" />
+                    </a>
+                  </td>
+
+                  <td width="30px"> <!-- Console Output -->
+                    <a href="${rootURL}${b.url}console">
+                      <img src="${imagesURL}/${subIconSize}/terminal.gif" title="${%Console output}" alt="${%Console output}" border="0" />
+                    </a>
+                  </td>
+            <td> <!-- Rebuild link -->
             </td>
           </tr>
         </j:forEach>
