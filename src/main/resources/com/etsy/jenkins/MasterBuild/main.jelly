@@ -75,7 +75,16 @@
                       <img src="${imagesURL}/${subIconSize}/terminal.gif" title="${%Console output}" alt="${%Console output}" border="0" />
                     </a>
                   </td>
-            <td> <!-- Rebuild link -->
+            <td width="50px" align="center"> <!-- Rebuild link -->
+              <j:getStatic var="success" className="hudson.model.Result" field="SUCCESS"/>
+              <j:choose>
+                <j:when test="${b.getResult().isWorseThan(success)}">
+                  <img src="${imagesURL}/${subIconSize}/clock.png" title="${%Rebuild}" alt="${%Rebuild}" border="0" />
+                </j:when>
+                <j:otherwise>
+                  <st:nbsp/>
+                </j:otherwise>
+              </j:choose>
             </td>
           </tr>
         </j:forEach>
