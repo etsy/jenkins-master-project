@@ -1,0 +1,19 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project" xmlns:i="jelly:fmt">
+
+  <f:section title="${%Sub-Jobs}">
+    <f:block>
+      <j:forEach var="job" items="${app.items}">
+        <j:if test="${!job.equals(it)}">
+          <f:checkbox 
+              name="${job.name}" 
+              checked="${it.contains(job)}" 
+              title="${job.name}" />
+          <br />
+        </j:if>
+      </j:forEach>
+    </f:block>
+  </f:section>
+
+</j:jelly>
+

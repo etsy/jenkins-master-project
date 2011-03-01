@@ -1,0 +1,18 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
+
+  <j:set var="items" value="${it.getSubProjects()}" />
+  <j:if test="${!empty(items)}">
+    <h2>${%Sub-Projects}</h2>
+    <ul style="list-style-type: none;">
+      <j:forEach var="item" items="${items}">
+        <j:if test="${h.hasPermission(item, item.READ)}">
+          <li>
+            <t:jobLink job="${item}" />
+          </li>
+        </j:if>
+      </j:forEach>
+    </ul>
+  </j:if>
+
+</j:jelly>
+
