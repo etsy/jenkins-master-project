@@ -3,6 +3,7 @@ package com.etsy.jenkins;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
+import hudson.model.Cause;
 import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.model.Result;
@@ -23,6 +24,7 @@ import java.util.SortedSet;
 public class MasterBuild extends Build<MasterProject, MasterBuild> {
 
   @Inject static Provider<MasterResult> masterResultProvider;
+  @Inject static MasterRebuilder rebuilder;
 
   private MasterResult masterResult;
 
@@ -53,10 +55,25 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
 
   /*package*/ void addSubBuild(String projectName, int buildNumber) {
     masterResult.addBuild(projectName, buildNumber);
+
+    for (int i = 0; i < 5; i++) {
+      try {
+        this.save();
+        return;
+      } catch (IOException retry) {}
+    }
   }
 
   public List<AbstractBuild> getLatestBuilds() {
     return masterResult.getLatestBuilds();
+  }
+
+  public void rebuild(AbstractProject project) {
+    SubResult subResult = masterResult.getResult(project.getDisplayName());
+    int rebuildNumber = subResult.getBuildNumbers().size();
+    Cause cause = new MasterBuildCause(this, rebuildNumber);
+
+    rebuilder.rebuild(this, project, cause);
   }
 }
 

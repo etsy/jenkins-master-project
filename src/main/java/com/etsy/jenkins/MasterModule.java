@@ -8,6 +8,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
 
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 
@@ -19,11 +20,19 @@ import java.util.concurrent.Executors;
         .toProvider(
             FactoryProvider.newFactory(
                 BuildWatcher.Factory.class, BuildWatcher.class));
+    bind(RebuildWatcher.Factory.class)
+        .toProvider(
+            FactoryProvider.newFactory(
+                RebuildWatcher.Factory.class, RebuildWatcher.class));
     bindConstant().annotatedWith(MasterProject.PingTime.class).to(7000L);
+
+    Executor executor = Executors.newCachedThreadPool();
+    bind(Executor.class)
+        .toInstance(executor);
     bind(new TypeLiteral<CompletionService<AbstractBuild>>() {})
        .toInstance(
            new ExecutorCompletionService<AbstractBuild>(
-               Executors.newCachedThreadPool()));
+               executor));
 
     requestStaticInjection(MasterBuild.class);
     requestStaticInjection(MasterProject.class);

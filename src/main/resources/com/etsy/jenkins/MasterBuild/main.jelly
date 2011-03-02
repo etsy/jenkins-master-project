@@ -79,7 +79,30 @@
               <j:getStatic var="success" className="hudson.model.Result" field="SUCCESS"/>
               <j:choose>
                 <j:when test="${b.getResult().isWorseThan(success)}">
-                  <img src="${imagesURL}/${subIconSize}/clock.png" title="${%Rebuild}" alt="${%Rebuild}" border="0" />
+                  <div>
+                    <a href="javascript:rebuild(this)">
+                      <img border="0" title="${%Rebuild}" alt="${%Rebuild}"
+                           src="${imagesURL}/${subIconSize}/clock.png" />
+                    </a>
+                  </div>
+                  <script>
+                    function rebuild(a) {
+                      new Ajax.Request(
+                          "${rootURL}${it.getProject().url}rebuild",
+                          {
+                              method: "post",
+                              parameters: 
+                              {
+                                  subProject: 
+                                      "${b.getProject().getDisplayName()}",
+                                  number: "${it.getNumber()}"
+                              }
+                          }
+                      );
+
+                      return false;
+                    }
+                  </script>
                 </j:when>
                 <j:otherwise>
                   <st:nbsp/>

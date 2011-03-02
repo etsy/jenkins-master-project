@@ -5,6 +5,7 @@ import com.etsy.jenkins.finder.ProjectFinder;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.BuildAuthorizationToken;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
@@ -82,6 +83,56 @@ implements TopLevelItem {
   @Override
   protected Class<MasterBuild> getBuildClass() {
     return MasterBuild.class;
+  }
+
+  public void doRebuild(StaplerRequest req, StaplerResponse res) 
+      throws IOException, ServletException {
+    BuildAuthorizationToken.checkPermission(
+        this, this.getAuthToken(), req, res);
+    AbstractProject subProject = this.getSubProject(req);
+    MasterBuild masterBuild = this.getMasterBuild(req);
+    masterBuild.rebuild(subProject);
+    res.forwardToPreviousPage(req);
+  }
+
+  private AbstractProject getSubProject(StaplerRequest req)
+      throws ServletException {
+    String subProjectName = req.getParameter("subProject");
+    if (subProjectName == null) {
+      throw new ServletException(
+          "Must provide a 'subProject' name parameter.");
+    }
+
+    AbstractProject subProject = projectFinder.findProject(subProjectName);
+    if (subProject == null) {
+      throw new ServletException("Project does not exist: " + subProjectName);
+    }
+
+    if (!this.contains((TopLevelItem) subProject)) {
+      throw new ServletException(
+          "Not a sub-project of this master project: " + subProjectName);
+    }
+
+    return subProject;
+  }
+
+  private MasterBuild getMasterBuild(StaplerRequest req)
+      throws ServletException {
+    String buildNumberString = req.getParameter("number");
+    if (buildNumberString == null) {
+      throw new ServletException(
+          "Must provide a master build 'number' parameter.");
+    }
+
+    int buildNumber = -1;
+    try {
+      buildNumber = Integer.parseInt(buildNumberString);
+    } catch (NumberFormatException e) {
+      throw new ServletException(
+         "Invalid 'number' parameter: " + buildNumberString);
+    }
+
+    return (MasterBuild) this.getBuildByNumber(buildNumber);
   }
 
   @Override

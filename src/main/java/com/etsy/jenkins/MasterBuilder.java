@@ -58,9 +58,7 @@ import java.util.concurrent.ExecutionException;
 
   /*package*/ Set<AbstractBuild> waitForBuilds(MasterBuild masterBuild,
       Set<AbstractProject> subProjects, Cause cause, BuildListener listener) {
-
-    List<Future<AbstractBuild>> futures = 
-        Lists.<Future<AbstractBuild>>newArrayList();
+    
     Set<AbstractBuild> builds = Sets.<AbstractBuild>newHashSet();
 
     for (AbstractProject subProject : subProjects) {
