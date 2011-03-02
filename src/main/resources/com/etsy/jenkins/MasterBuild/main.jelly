@@ -1,5 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
 
+  
   <j:invokeStatic var="hudson" className="hudson.model.Hudson" method="getInstance" />
   <j:set var="rootURL" value="${hudson.getRootURL() + '/'}" />
   <j:set var="builds" value="${it.getLatestBuilds()}" />
@@ -20,6 +21,24 @@
       </tr>
       <!-- TODO: support gradual expansion of the list -->
       <j:forEach var="b" items="${builds}">
+        <script>
+          function rebuild(a) {
+            new Ajax.Request(
+                "${rootURL}${it.getProject().url}rebuild",
+                {
+                    method: "post",
+                    parameters: 
+                    {
+                        subProject: "${b.getProject().getDisplayName()}",
+                        number: "${it.getNumber()}"
+                    }
+                }
+            );
+
+            return false;
+          }
+        </script>
+
         <tr>
           <td data="${b.iconColor.ordinal()}">
             <a href="${rootURL}${b.url}">
@@ -62,59 +81,45 @@
                        border="0" />
                 </a>
               </j:when>
-            <j:otherwise>
-              <st:nbsp/>
-            </j:otherwise>
-          </j:choose>
-        </td>
+              <j:otherwise>
+                <st:nbsp/>
+              </j:otherwise>
+            </j:choose>
+          </td>
 
-        <td width="30px"> <!-- Changes -->
-          <a href="${rootURL}${b.url}changes">
-            <img src="${imagesURL}/${subIconSize}/notepad.gif" 
-                 title="${%Changes}" alt="${%Changes}" border="0" />
-          </a>
-        </td>
+          <td width="30px"> <!-- Changes -->
+            <a href="${rootURL}${b.url}changes">
+              <img src="${imagesURL}/${subIconSize}/notepad.gif" 
+                   title="${%Changes}" alt="${%Changes}" border="0" />
+            </a>
+          </td>
 
-        <td width="30px"> <!-- Console Output -->
-          <a href="${rootURL}${b.url}console">
-            <img src="${imagesURL}/${subIconSize}/terminal.gif" title="${%Console output}" alt="${%Console output}" border="0" />
-          </a>
-        </td>
-        <td width="50px" align="center"> <!-- Rebuild link -->
-          <j:getStatic var="success" className="hudson.model.Result" field="SUCCESS"/>
-          <j:choose>
-            <j:when test="${b.getResult().isWorseThan(success)}">
-              <a href="javascript:rebuild(this)">
-                <img border="0" title="${%Rebuild}" alt="${%Rebuild}"
-                     src="${imagesURL}/${subIconSize}/clock.png" />
-              </a>
-              <script>
-                function rebuild(a) {
-                  new Ajax.Request(
-                      "${rootURL}${it.getProject().url}rebuild",
-                      {
-                          method: "post",
-                          parameters: 
-                          {
-                              subProject: "${b.getProject().getDisplayName()}",
-                              number: "${it.getNumber()}"
-                         }
-                      }
-                  );
-
-                  return false;
-                }
-              </script>
-            </j:when>
-            <j:otherwise>
-              <st:nbsp/>
-            </j:otherwise>
-          </j:choose>
-        </td>
-      </tr>
-    </j:forEach>
-  </table>
-  <t:rssBar-with-iconSize/>
-</j:if>
+          <td width="30px"> <!-- Console Output -->
+            <a href="${rootURL}${b.url}console">
+              <img src="${imagesURL}/${subIconSize}/terminal.gif" 
+                   title="${%Console output}" alt="${%Console output}" 
+                   border="0" />
+            </a>
+          </td>
+          <td width="50px" align="center"> <!-- Rebuild link -->
+            <j:getStatic var="success" className="hudson.model.Result" field="SUCCESS"/>
+            <j:choose>
+              <j:when test="${b.getResult().isWorseThan(success)}">
+                <a href="javascript:rebuild(this)">
+                  <img border="0" title="${%Rebuild}" alt="${%Rebuild}"
+                       src="${imagesURL}/${subIconSize}/clock.png" />
+                </a>
+              </j:when>
+              <j:otherwise>
+                <st:nbsp/>
+              </j:otherwise>
+            </j:choose>
+          </td>
+        </tr>
+      </j:forEach>
+    </table>
+    <t:rssBar-with-iconSize/>
+  </j:if>
+  
 </j:jelly>
 
