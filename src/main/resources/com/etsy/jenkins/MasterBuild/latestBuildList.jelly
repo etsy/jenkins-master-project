@@ -1,0 +1,49 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
+
+  <j:invokeStatic var="hudson" className="hudson.model.Hudson" method="getInstance" />
+  <j:set var="rootURL" value="${hudson.getRootURL() + '/'}" />
+  <j:set var="builds" value="${it.getLatestBuilds()}" />
+
+  <script>
+    function rebuild(projectName) {
+      new Ajax.Request(
+          "${rootURL}${it.getProject().url}rebuild",
+          {
+              method: "post",
+              parameters: 
+              {
+                  subProject: projectName,
+                  number: "${it.getNumber()}"
+              }
+          }
+      );
+
+      return false;
+    }
+  </script>
+
+  <h2>${%Latest Builds}</h2>
+  <t:setIconSize/>
+  <table class="sortable pane bigtable" id="projectStatus">
+    <tr>
+      <th><st:nbsp/></th>
+      <th>${%Build}</th>
+      <th initialSortDir="up">${%Date}</th>
+      <th>${%Status}</th>
+      <th><st:nbsp/></th> <!-- Artifacts -->
+      <th><st:nbsp/></th> <!-- Changes -->
+      <th><st:nbsp/></th> <!-- Test Report -->
+      <th><st:nbsp/></th> <!-- Console output -->
+      <th><st:nbsp/></th> <!-- Rebuild button -->
+    </tr>
+    <!-- TODO: support gradual expansion of the list -->
+    <j:forEach var="b" items="${builds}">
+      <tr id="${b.getProject().getDisplayName()}">
+        <st:include page="latestBuildRow.jelly"/>
+      </tr>
+    </j:forEach>
+  </table>
+  <t:rssBar-with-iconSize/>
+  
+</j:jelly>
+

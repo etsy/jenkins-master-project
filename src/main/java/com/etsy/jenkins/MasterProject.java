@@ -92,7 +92,7 @@ implements TopLevelItem {
     AbstractProject subProject = this.getSubProject(req);
     MasterBuild masterBuild = this.getMasterBuild(req);
     masterBuild.rebuild(subProject);
-    res.forwardToPreviousPage(req);
+    res.forward(masterBuild, masterBuild.getUrl(), req);
   }
 
   private AbstractProject getSubProject(StaplerRequest req)
