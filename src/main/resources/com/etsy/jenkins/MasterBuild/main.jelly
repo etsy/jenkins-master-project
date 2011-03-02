@@ -6,114 +6,115 @@
   <j:if test="${!empty(builds)}">
     <h2>${%Latest Builds}</h2>
     <t:setIconSize/>
-      <table class="sortable pane bigtable" id="projectStatus">
+    <table class="sortable pane bigtable" id="projectStatus">
+      <tr>
+        <th><st:nbsp/></th>
+        <th>${%Build}</th>
+        <th initialSortDir="up">${%Date}</th>
+        <th>${%Status}</th>
+        <th><st:nbsp/></th> <!-- Artifacts -->
+        <th><st:nbsp/></th> <!-- Changes -->
+        <th><st:nbsp/></th> <!-- Test Report -->
+        <th><st:nbsp/></th> <!-- Console output -->
+        <th><st:nbsp/></th> <!-- Rebuild button -->
+      </tr>
+      <!-- TODO: support gradual expansion of the list -->
+      <j:forEach var="b" items="${builds}">
         <tr>
-          <th><st:nbsp/></th>
-          <th>${%Build}</th>
-          <th initialSortDir="up">${%Date}</th>
-          <th>${%Status}</th>
-          <th><st:nbsp/></th> <!-- Artifacts -->
-          <th><st:nbsp/></th> <!-- Changes -->
-          <th><st:nbsp/></th> <!-- Test Report -->
-          <th><st:nbsp/></th> <!-- Console output -->
-          <th><st:nbsp/></th> <!-- Rebuild button -->
-        </tr>
-        <!-- TODO: support gradual expansion of the list -->
-        <j:forEach var="b" items="${builds}">
-          <tr>
-            <td data="${b.iconColor.ordinal()}">
-              <a href="${rootURL}${b.url}">
-                <img src="${imagesURL}/${iconSize}/${b.buildStatusUrl}"
-                   alt="${b.iconColor.description}"/>
-              </a>
-            </td>
-            <td>
-              <a href="${rootURL}${b.parent.url}">${b.parent.fullDisplayName}</a>
+          <td data="${b.iconColor.ordinal()}">
+            <a href="${rootURL}${b.url}">
+              <img src="${imagesURL}/${iconSize}/${b.buildStatusUrl}"
+                 alt="${b.iconColor.description}"/>
+            </a>
+          </td>
+          <td>
+            <a href="${rootURL}${b.parent.url}">${b.parent.fullDisplayName}</a>
+            <st:nbsp/>
+            <a href="${rootURL}${b.url}">${b.displayName}</a>
+          </td>
+          <td data="${b.timestampString2}">
+            ${b.timestampString}
+          </td>
+          <td>
+            <t:buildStatusSummary build="${b}" />
+          </td>
+          <td width="30px"> <!-- Build Artifacts -->
+            <j:choose>
+              <j:when test="${b.getHasArtifacts()}">
+                <a href="${rootURL}${b.url}artifact/">
+                  <img src="${imagesURL}/${subIconSize}/package.gif" 
+                       title="${%Build Artifacts}" 
+                       alt="${%Build Artifacts}" border="0" />
+                </a>
+              </j:when>
+              <j:otherwise>
+                <st:nbsp/>
+              </j:otherwise>
+            </j:choose>
+          </td>
+
+          <td width="30px"> <!-- Test Result -->
+            <j:choose>
+              <j:when test="${b.getTestResultAction() != null}">
+                <a href="${rootURL}${b.url}testReport/">
+                  <img src="${imagesURL}/${subIconSize}/clipboard.gif" 
+                       title="${%Test Result}" alt="${%Test Result}" 
+                       border="0" />
+                </a>
+              </j:when>
+            <j:otherwise>
               <st:nbsp/>
-              <a href="${rootURL}${b.url}">${b.displayName}</a>
-            </td>
-            <td data="${b.timestampString2}">
-              ${b.timestampString}
-            </td>
-            <td>
-              <t:buildStatusSummary build="${b}" />
-            </td>
-                  <td width="30px"> <!-- Build Artifacts -->
-                    <j:choose>
-                      <j:when test="${b.getHasArtifacts()}">
-                        <a href="${rootURL}${b.url}artifact/">
-                          <img src="${imagesURL}/${subIconSize}/package.gif" title="${%Build Artifacts}" alt="${%Build Artifacts}" border="0" />
-                        </a>
-                      </j:when>
-                      <j:otherwise>
-                        <st:nbsp/>
-                      </j:otherwise>
-                    </j:choose>
-                  </td>
+            </j:otherwise>
+          </j:choose>
+        </td>
 
-                  <td width="30px"> <!-- Test Result -->
-                    <j:choose>
-                      <j:when test="${b.getTestResultAction() != null}">
-                        <a href="${rootURL}${b.url}testReport/">
-                          <img src="${imagesURL}/${subIconSize}/clipboard.gif" title="${%Test Result}" alt="${%Test Result}" border="0" />
-                        </a>
-                      </j:when>
-                      <j:otherwise>
-                        <st:nbsp/>
-                      </j:otherwise>
-                    </j:choose>
-                  </td>
+        <td width="30px"> <!-- Changes -->
+          <a href="${rootURL}${b.url}changes">
+            <img src="${imagesURL}/${subIconSize}/notepad.gif" 
+                 title="${%Changes}" alt="${%Changes}" border="0" />
+          </a>
+        </td>
 
-                  <td width="30px"> <!-- Changes -->
-                    <a href="${rootURL}${b.url}changes">
-                      <img src="${imagesURL}/${subIconSize}/notepad.gif" title="${%Changes}" alt="${%Changes}" border="0" />
-                    </a>
-                  </td>
-
-                  <td width="30px"> <!-- Console Output -->
-                    <a href="${rootURL}${b.url}console">
-                      <img src="${imagesURL}/${subIconSize}/terminal.gif" title="${%Console output}" alt="${%Console output}" border="0" />
-                    </a>
-                  </td>
-            <td width="50px" align="center"> <!-- Rebuild link -->
-              <j:getStatic var="success" className="hudson.model.Result" field="SUCCESS"/>
-              <j:choose>
-                <j:when test="${b.getResult().isWorseThan(success)}">
-                  <div>
-                    <a href="javascript:rebuild(this)">
-                      <img border="0" title="${%Rebuild}" alt="${%Rebuild}"
-                           src="${imagesURL}/${subIconSize}/clock.png" />
-                    </a>
-                  </div>
-                  <script>
-                    function rebuild(a) {
-                      new Ajax.Request(
-                          "${rootURL}${it.getProject().url}rebuild",
+        <td width="30px"> <!-- Console Output -->
+          <a href="${rootURL}${b.url}console">
+            <img src="${imagesURL}/${subIconSize}/terminal.gif" title="${%Console output}" alt="${%Console output}" border="0" />
+          </a>
+        </td>
+        <td width="50px" align="center"> <!-- Rebuild link -->
+          <j:getStatic var="success" className="hudson.model.Result" field="SUCCESS"/>
+          <j:choose>
+            <j:when test="${b.getResult().isWorseThan(success)}">
+              <a href="javascript:rebuild(this)">
+                <img border="0" title="${%Rebuild}" alt="${%Rebuild}"
+                     src="${imagesURL}/${subIconSize}/clock.png" />
+              </a>
+              <script>
+                function rebuild(a) {
+                  new Ajax.Request(
+                      "${rootURL}${it.getProject().url}rebuild",
+                      {
+                          method: "post",
+                          parameters: 
                           {
-                              method: "post",
-                              parameters: 
-                              {
-                                  subProject: 
-                                      "${b.getProject().getDisplayName()}",
-                                  number: "${it.getNumber()}"
-                              }
-                          }
-                      );
+                              subProject: "${b.getProject().getDisplayName()}",
+                              number: "${it.getNumber()}"
+                         }
+                      }
+                  );
 
-                      return false;
-                    }
-                  </script>
-                </j:when>
-                <j:otherwise>
-                  <st:nbsp/>
-                </j:otherwise>
-              </j:choose>
-            </td>
-          </tr>
-        </j:forEach>
-      </table>
-      <t:rssBar-with-iconSize/>
-  </j:if>
-
+                  return false;
+                }
+              </script>
+            </j:when>
+            <j:otherwise>
+              <st:nbsp/>
+            </j:otherwise>
+          </j:choose>
+        </td>
+      </tr>
+    </j:forEach>
+  </table>
+  <t:rssBar-with-iconSize/>
+</j:if>
 </j:jelly>
 
