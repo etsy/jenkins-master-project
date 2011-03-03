@@ -1,5 +1,5 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
-
+<l:ajax>
   <j:invokeStatic var="hudson" className="hudson.model.Hudson" method="getInstance" />
   <j:set var="rootURL" value="${hudson.getRootURL() + '/'}" />
   <j:set var="builds" value="${it.getLatestBuilds()}" />
@@ -24,8 +24,8 @@
 
   <h2>${%Latest Builds}</h2>
   <t:setIconSize/>
-  <table class="sortable pane bigtable" id="projectStatus">
-    <tr>
+  <table class="sortable pane bigtable" id="latestBuilds">
+    <tr align="left">
       <th><st:nbsp/></th>
       <th>${%Build}</th>
       <th initialSortDir="up">${%Date}</th>
@@ -44,6 +44,6 @@
     </j:forEach>
   </table>
   <t:rssBar-with-iconSize/>
-  
+</l:ajax>
 </j:jelly>
 

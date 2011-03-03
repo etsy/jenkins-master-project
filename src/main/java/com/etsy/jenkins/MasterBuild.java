@@ -9,6 +9,9 @@ import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import javax.servlet.ServletException;
 
 public class MasterBuild extends Build<MasterProject, MasterBuild> {
 
@@ -74,6 +78,11 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
     Cause cause = new MasterBuildCause(this, rebuildNumber);
 
     rebuilder.rebuild(this, project, cause);
+  }
+
+  public void doRefreshLatestBuilds(StaplerRequest req, StaplerResponse res)
+      throws IOException, ServletException {
+    req.getView(this, "latestBuildList.jelly").forward(req, res);
   }
 }
 
