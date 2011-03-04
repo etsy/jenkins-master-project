@@ -5,7 +5,6 @@ import com.etsy.jenkins.finder.ProjectFinder;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
-import hudson.model.BuildAuthorizationToken;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
@@ -15,6 +14,7 @@ import hudson.model.Project;
 import hudson.model.TopLevelItem;
 import hudson.model.TopLevelItemDescriptor;
 import hudson.model.listeners.ItemListener;
+import hudson.security.Permission;
 import hudson.tasks.Builder;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -87,8 +87,8 @@ implements TopLevelItem {
 
   public void doRebuild(StaplerRequest req, StaplerResponse res) 
       throws IOException, ServletException {
-    BuildAuthorizationToken.checkPermission(
-        this, this.getAuthToken(), req, res);
+    checkPermission(Permission.READ);
+
     AbstractProject subProject = this.getSubProject(req);
     MasterBuild masterBuild = this.getMasterBuild(req);
     masterBuild.rebuild(subProject);

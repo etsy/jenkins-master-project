@@ -8,6 +8,7 @@ import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.security.Permission;
 
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -82,6 +83,8 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
 
   public void doRefreshLatestBuilds(StaplerRequest req, StaplerResponse res)
       throws IOException, ServletException {
+    checkPermission(Permission.READ);
+
     req.getView(this, "latestBuildList.jelly").forward(req, res);
   }
 }
