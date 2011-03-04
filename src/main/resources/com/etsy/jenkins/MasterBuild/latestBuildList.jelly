@@ -43,7 +43,6 @@
       </tr>
     </j:forEach>
   </table>
-  <t:rssBar-with-iconSize/>
 </l:ajax>
 </j:jelly>
 
