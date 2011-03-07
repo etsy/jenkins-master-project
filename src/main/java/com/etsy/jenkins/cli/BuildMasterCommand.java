@@ -1,6 +1,7 @@
 package com.etsy.jenkins.cli;
 
 import com.etsy.jenkins.MasterProject;
+import com.etsy.jenkins.cli.handlers.MasterProjectOptionHandler;
 
 import hudson.AbortException;
 import hudson.Extension;
@@ -46,7 +47,8 @@ public class BuildMasterCommand extends CLICommand {
   @Argument(
       metaVar="MASTER_JOB", 
       usage="Name of the master project to build.", 
-      required=true)
+      required=true,
+      handler=MasterProjectOptionHandler.class)
   public MasterProject masterProject;
 
   @Argument(
@@ -69,31 +71,6 @@ public class BuildMasterCommand extends CLICommand {
       name="-p",
       usage="Specify the build parameters in the key=value format.")
   public Map<String, String> parameters = Maps.<String, String>newHashMap();
-
-  @CLIResolver
-  public static MasterProject resolveMasterProjectForCLI(
-      @Argument(
-      metaVar="MASTER_JOB", 
-      usage="Name of the master project to build.", 
-      required=true) 
-      String name) throws CmdLineException {
-    TopLevelItem item = 
-        Hudson.getInstance().getItem(name);
-    if (item == null) {
-        throw new CmdLineException(null,
-            String.format(
-                "No such project: %s",
-                name));
-    }
-    
-    if (!(item instanceof MasterProject)) {
-        throw new CmdLineException(null,
-            String.format(
-                "Not a master project: %s",
-                name));
-    }
-    return (MasterProject) item;
-  }
 
   @CLIResolver
   public static User resolveProxyUserForCLI(

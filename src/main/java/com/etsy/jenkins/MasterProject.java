@@ -4,6 +4,7 @@ import com.etsy.jenkins.finder.ProjectFinder;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.cli.declarative.CLIResolver;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
@@ -17,6 +18,8 @@ import hudson.model.listeners.ItemListener;
 import hudson.security.Permission;
 import hudson.tasks.Builder;
 
+import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -50,6 +53,7 @@ implements TopLevelItem {
 
   /*package*/ final Set<String> jobNames;
 
+  @Inject static Hudson hudson;
   @Inject static ProjectFinder projectFinder;
   @Inject static MasterBuilder masterBuilder;
 
@@ -166,6 +170,32 @@ implements TopLevelItem {
       subProjects.add(projectFinder.findProject(jobName));
     }
     return subProjects;
+  }
+
+  @CLIResolver
+  public static MasterProject resolveForCLI(
+      @Argument(
+          metaVar="MASTER_JOB",
+          usage="Name of the master project to build.",
+          required = true)
+      String name) throws CmdLineException {
+
+    TopLevelItem item = hudson.getItem(name);
+    if (item == null) {
+      throw new CmdLineException(null,
+          String.format(
+              "No such project: %s",
+              name));
+    }
+
+    if (!(item instanceof MasterProject)) {
+      throw new CmdLineException(null,
+           String.format(
+               "Not a master project: %s",
+               name));
+    }
+
+    return (MasterProject) item; 
   }
 
   @Extension
