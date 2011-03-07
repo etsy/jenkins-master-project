@@ -2,11 +2,11 @@ package com.etsy.jenkins.cli;
 
 import com.etsy.jenkins.MasterProject;
 import com.etsy.jenkins.cli.handlers.MasterProjectOptionHandler;
+import com.etsy.jenkins.cli.handlers.ProxyUserOptionHandler;
 
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.cli.CLICommand;
-import hudson.cli.declarative.CLIResolver;
 import hudson.console.HyperlinkNote;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
@@ -22,7 +22,6 @@ import hudson.model.User;
 import hudson.util.EditDistance;
 
 import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.stapler.export.Exported;
 
@@ -48,13 +47,16 @@ public class BuildMasterCommand extends CLICommand {
       metaVar="MASTER_JOB", 
       usage="Name of the master project to build.", 
       required=true,
-      handler=MasterProjectOptionHandler.class)
+      handler=MasterProjectOptionHandler.class,
+      index=0)
   public MasterProject masterProject;
 
   @Argument(
       metaVar="PROXY_USER",
       usage="LDAP of user that this build is being triggered for.",
-      required=false)
+      required=false,
+      handler=ProxyUserOptionHandler.class,
+      index=1)
   public User user = User.getUnknown();
 
   @Option(
@@ -71,23 +73,6 @@ public class BuildMasterCommand extends CLICommand {
       name="-p",
       usage="Specify the build parameters in the key=value format.")
   public Map<String, String> parameters = Maps.<String, String>newHashMap();
-
-  @CLIResolver
-  public static User resolveProxyUserForCLI(
-      @Argument(
-      metaVar="PROXY_USER",
-      usage="LDAP of user that this build is being triggered for.",
-      required=false)
-      String username) throws CmdLineException {
-    User user = User.get(username);
-    if (user == null) {
-      throw new CmdLineException(null,
-          String.format(
-              "User does not exist: %s",
-              username));
-    }
-    return user;
-  }
 
   @Override
   protected int run() throws Exception {

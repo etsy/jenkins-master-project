@@ -4,7 +4,6 @@ import com.etsy.jenkins.finder.ProjectFinder;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.cli.declarative.CLIResolver;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
@@ -170,32 +169,6 @@ implements TopLevelItem {
       subProjects.add(projectFinder.findProject(jobName));
     }
     return subProjects;
-  }
-
-  @CLIResolver
-  public static MasterProject resolveForCLI(
-      @Argument(
-          metaVar="MASTER_JOB",
-          usage="Name of the master project to build.",
-          required = true)
-      String name) throws CmdLineException {
-
-    TopLevelItem item = hudson.getItem(name);
-    if (item == null) {
-      throw new CmdLineException(null,
-          String.format(
-              "No such project: %s",
-              name));
-    }
-
-    if (!(item instanceof MasterProject)) {
-      throw new CmdLineException(null,
-           String.format(
-               "Not a master project: %s",
-               name));
-    }
-
-    return (MasterProject) item; 
   }
 
   @Extension
