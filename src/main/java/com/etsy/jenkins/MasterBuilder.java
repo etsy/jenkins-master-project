@@ -5,6 +5,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
+import hudson.model.ParametersAction;
 import hudson.tasks.Builder;
 
 import com.google.common.collect.Lists;
@@ -20,15 +21,18 @@ import java.util.concurrent.ExecutionException;
 
 /*package*/ class MasterBuilder extends Builder {
 
-  private BuildWatcher.Factory buildWatcherFactory;
-  private CompletionService<AbstractBuild> completionService;
+  private final BuildWatcher.Factory buildWatcherFactory;
+  private final CompletionService<AbstractBuild> completionService;
+  private final ParametersActionPropagator parametersActionPropagator;
 
   @Inject
   public MasterBuilder(
       BuildWatcher.Factory buildWatcherFactory,
-      CompletionService<AbstractBuild> completionService) {
+      CompletionService<AbstractBuild> completionService,
+      ParametersActionPropagator parametersActionPropagator) {
     this.buildWatcherFactory = buildWatcherFactory;
     this.completionService = completionService;
+    this.parametersActionPropagator = parametersActionPropagator;
   }
 
   @Override
@@ -40,7 +44,7 @@ import java.util.concurrent.ExecutionException;
     Set<AbstractProject> subProjects = masterProject.getSubProjects();
     Cause cause = new MasterBuildCause(masterBuild);
 
-    scheduleBuilds(subProjects, cause, listener);
+    scheduleBuilds(masterBuild, subProjects, cause, listener);
 
     waitForBuilds(masterBuild, subProjects, cause, listener);
 
@@ -48,9 +52,15 @@ import java.util.concurrent.ExecutionException;
   }
 
   /*package*/ void scheduleBuilds(
-      Set<AbstractProject> subProjects, Cause cause, BuildListener listener) {
+      MasterBuild masterBuild,
+      Set<AbstractProject> subProjects, 
+      Cause cause,
+      BuildListener listener) {
     for (AbstractProject subProject : subProjects) {
-      subProject.scheduleBuild(0, cause);
+      ParametersAction[] parametersActions =
+          parametersActionPropagator
+              .getPropagatedActions(masterBuild, subProject);
+      subProject.scheduleBuild(0, cause, parametersActions);
       listener.getLogger().printf("Build scheduled: %s\n", 
           subProject.getDisplayName());
     }
