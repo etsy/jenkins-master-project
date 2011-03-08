@@ -30,6 +30,7 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 import java.io.IOException;
@@ -54,7 +55,7 @@ implements TopLevelItem {
 
   @Inject static Hudson hudson;
   @Inject static ProjectFinder projectFinder;
-  @Inject static MasterBuilder masterBuilder;
+  @Inject static Provider<MasterBuilder> masterBuilderProvider;
 
   @DataBoundConstructor
   public MasterProject(
@@ -80,7 +81,7 @@ implements TopLevelItem {
 
   @Override
   public List<Builder> getBuilders() {
-    return Lists.<Builder>newArrayList(masterBuilder);
+    return Lists.<Builder>newArrayList(masterBuilderProvider.get());
   }
 
   @Override

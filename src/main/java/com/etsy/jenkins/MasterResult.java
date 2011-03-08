@@ -58,7 +58,11 @@ import java.util.Set;
   public Result getOverallResult() {
     Result endResult = Result.SUCCESS;
     for (SubResult subResult : results.values()) {
-      endResult = endResult.combine(subResult.getResult());
+      Result result = subResult.getResult();
+      if (result == null) {
+        result = Result.NOT_BUILT;
+      }
+      endResult = endResult.combine(result);
     }
     return endResult;
   }

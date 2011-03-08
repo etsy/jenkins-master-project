@@ -13,6 +13,7 @@ import hudson.security.Permission;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.concurrent.Future;
 import javax.servlet.ServletException;
 
 public class MasterBuild extends Build<MasterProject, MasterBuild> {
@@ -32,6 +34,9 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
   @Inject static MasterRebuilder rebuilder;
 
   private MasterResult masterResult;
+
+  private transient List<Future<AbstractBuild>> futuresToAbort =
+      Lists.<Future<AbstractBuild>>newArrayList();
 
   public MasterBuild(MasterProject project) throws IOException {
     super(project);
@@ -86,6 +91,19 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
     checkPermission(Permission.READ);
 
     req.getView(this, "latestBuildList.jelly").forward(req, res);
+  }
+
+  /*package*/ void addFuture(Future<AbstractBuild> future) {
+    futuresToAbort.add(future);
+  }
+
+  @Override
+  public void doStop(StaplerRequest req, StaplerResponse res) 
+      throws IOException, ServletException {
+    for (Future<AbstractBuild> future : futuresToAbort) {
+      future.cancel(true);
+    }
+    super.doStop(req, res);
   }
 }
 

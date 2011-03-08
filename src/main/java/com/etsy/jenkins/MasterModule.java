@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
 
@@ -29,15 +30,16 @@ import java.util.concurrent.Executors;
     Executor executor = Executors.newCachedThreadPool();
     bind(Executor.class)
         .toInstance(executor);
-    bind(new TypeLiteral<CompletionService<AbstractBuild>>() {})
-       .toInstance(
-           new ExecutorCompletionService<AbstractBuild>(
-               executor));
 
     requestStaticInjection(MasterBuild.class);
     requestStaticInjection(MasterProject.class);
     requestStaticInjection(MasterResult.class);
     requestStaticInjection(SubResult.class);
+  }
+
+  @Provides CompletionService<AbstractBuild> providesCompletionService(
+       Executor executor) {
+    return new ExecutorCompletionService<AbstractBuild>(executor);
   }
 }
 

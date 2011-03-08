@@ -60,7 +60,9 @@ import java.util.concurrent.ExecutionException;
       ParametersAction[] parametersActions =
           parametersActionPropagator
               .getPropagatedActions(masterBuild, subProject);
-      subProject.scheduleBuild(0, cause, parametersActions);
+      Future<AbstractBuild> future =
+          subProject.scheduleBuild2(0, cause, parametersActions);
+      masterBuild.addFuture(future);
       listener.getLogger().printf("Build scheduled: %s\n", 
           subProject.getDisplayName());
     }
