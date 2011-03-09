@@ -152,17 +152,23 @@ public class BuildMasterCommand extends CLICommand {
     }
 
     @Exported(visibility=3)
-    public String getAuthUserLink() {
-      return HyperlinkNote.encodeTo(
-          authUser.getAbsoluteUrl(),
-          authUser.getDisplayName());
+    public String getAuthUserName() {
+      return authUser.getDisplayName();
     }
 
     @Exported(visibility=3)
-    public String getProxyUserLink() {
-      return HyperlinkNote.encodeTo(
-          proxyUser.getAbsoluteUrl(),
-          proxyUser.getDisplayName());
+    public String getAuthUserUrl() {
+      return authUser.getAbsoluteUrl();
+    }
+
+    @Exported(visibility=3)
+    public String getProxyUserName() {
+      return proxyUser.getDisplayName();
+    }
+
+    @Exported(visibility=3)
+    public String getProxyUserUrl() {
+      return proxyUser.getAbsoluteUrl();
     }
 
     @Exported(visibility=3)
@@ -172,14 +178,16 @@ public class BuildMasterCommand extends CLICommand {
 
     @Override
     public String getShortDescription() {
-      return String.format(
-          "Started by command line by %s for %s\nDetails: %s\n",
-           getAuthUserLink(), getProxyUserLink(), getDescription());
+      return "Started by command line";
     }
 
     @Override
     public void print(TaskListener listener) {
-        listener.getLogger().println(getShortDescription());
+        listener.getLogger().println(String.format(
+          "Started by command line by %s for %s\nDetails: %s\n",
+           HyperlinkNote.encodeTo(getAuthUserUrl(), getAuthUserName()), 
+           HyperlinkNote.encodeTo(getProxyUserUrl(), getProxyUserName()),
+           getDescription()));
     }
 
     @Override
