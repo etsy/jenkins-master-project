@@ -16,5 +16,9 @@ public class MasterBuildCause extends Cause.UpstreamCause {
     super(master);
     this.rebuildNumber = rebuildNumber;
   }
+
+  public int getRebuildNumber() {
+    return rebuildNumber;
+  }
 }
 

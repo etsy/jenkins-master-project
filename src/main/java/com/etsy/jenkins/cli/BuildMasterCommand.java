@@ -109,7 +109,12 @@ public class BuildMasterCommand extends CLICommand {
        a = new ParametersAction(values);
      }
 
-     Cause cause = new CLICause(user, description);
+     User authUser = User.get(Hudson.getAuthentication().getName());
+     if (authUser == null) {
+       authUser = User.getUnknown();
+     }
+     
+     Cause cause = new CLICause(authUser, user, description);
      Future<? extends AbstractBuild> f = 
          masterProject.scheduleBuild2(0, cause, a);
      if (!sync) return 0;
@@ -136,17 +141,28 @@ public class BuildMasterCommand extends CLICommand {
 
   public static class CLICause extends Cause {
 
-    private final User user;
+    private final User authUser;
+    private final User proxyUser;
     private final String description;
 
-    public CLICause(User user, String description) {
-      this.user = user;
+    public CLICause(User authUser, User proxyUser, String description) {
+      this.authUser = authUser;
+      this.proxyUser = proxyUser;
       this.description = description;
     }
 
     @Exported(visibility=3)
-    public String getUserName() {
-      return user.getDisplayName();
+    public String getAuthUserLink() {
+      return HyperlinkNote.encodeTo(
+          authUser.getAbsoluteUrl(),
+          authUser.getDisplayName());
+    }
+
+    @Exported(visibility=3)
+    public String getProxyUserLink() {
+      return HyperlinkNote.encodeTo(
+          proxyUser.getAbsoluteUrl(),
+          proxyUser.getDisplayName());
     }
 
     @Exported(visibility=3)
@@ -156,18 +172,14 @@ public class BuildMasterCommand extends CLICommand {
 
     @Override
     public String getShortDescription() {
-      return "Started by command line";
+      return String.format(
+          "Started by command line by %s for %s\nDetails: %s\n",
+           getAuthUserLink(), getProxyUserLink(), getDescription());
     }
 
     @Override
     public void print(TaskListener listener) {
-        listener.getLogger().println(
-            String.format(
-                "%s for %s\nDetails: %s\n",
-                getShortDescription(),
-                HyperlinkNote.encodeTo(
-                    this.user.getAbsoluteUrl(), getUserName()),
-                getDescription()));
+        listener.getLogger().println(getShortDescription());
     }
 
     @Override
@@ -176,13 +188,14 @@ public class BuildMasterCommand extends CLICommand {
         return false;
       }
       CLICause other = (CLICause) o;
-      return Objects.equal(this.user, other.user)
+      return Objects.equal(this.authUser, other.authUser)
+          && Objects.equal(this.proxyUser, other.proxyUser)
           && Objects.equal(this.description, other.description);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(this.user, this.description);
+      return Objects.hashCode(this.authUser, this.proxyUser, this.description);
     }
   }
 }

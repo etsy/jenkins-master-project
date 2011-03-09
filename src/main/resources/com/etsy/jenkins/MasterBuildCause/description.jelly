@@ -1,0 +1,14 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" 
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+  <span>
+    ${it.upstreamUrl!= null ? "%started_by_master(it.upstreamProject,it.upstreamBuild.toString(),it.upstreamUrl,rootURL)" : it.shortDescription}
+    <j:set var="rebuild_number" value="${it.getRebuildNumber()}"/>
+    <j:if test="${rebuild_number > 0}">
+      <br/>
+      ${%rebuild(rebuild_number)}
+    </j:if>
+  </span>
+
+</j:jelly>
+
