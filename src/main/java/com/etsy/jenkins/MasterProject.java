@@ -16,6 +16,7 @@ import hudson.model.TopLevelItemDescriptor;
 import hudson.model.listeners.ItemListener;
 import hudson.security.Permission;
 import hudson.tasks.Builder;
+import hudson.tasks.Publisher;
 
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -82,6 +83,10 @@ implements TopLevelItem {
   @Override
   public List<Builder> getBuilders() {
     return Lists.<Builder>newArrayList(masterBuilderProvider.get());
+  }
+
+  public List<Descriptor<Publisher>> getPotentialPublisherDescriptors() {
+    return Lists.<Descriptor<Publisher>>newArrayList(MasterMailer.DESCRIPTOR);
   }
 
   @Override

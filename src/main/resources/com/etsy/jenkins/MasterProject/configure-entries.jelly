@@ -15,5 +15,10 @@
     </f:block>
   </f:section>
 
+  <f:descriptorList 
+      title="${%Post-build Actions}"
+      descriptors="${it.getPotentialPublisherDescriptors()}"
+      instances="$it.publishers}" />
+
 </j:jelly>
 

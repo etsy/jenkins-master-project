@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" 
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  
+  <f:entry title="${%Recipients}" description="${%recipients_description}">
+    <f:textbox name="recipients" value="${instance.recipients}"/>
+  </f:entry>
+
+  <f:entry title="${%User Defined Content}" 
+      description="${%user_defined_content_description}">
+    <f:textarea name="preamble" value="${instance.preamble}" 
+        class="fixed-width"/>
+  </f:entry>
+  
+  <f:entry title="${%Links}" description="${%links_description}">
+    <f:repeatable name="links" var="link" items="${instance.links.entrySet()}">
+      <table width="100%">
+        <tr>
+          <th>${%Link}</th>
+          <td><input type="text" width="100%" style="text-align:left" name="path" value="${link.getKey()}" /></td>
+        </tr>
+        <tr>
+          <th>${%Text}</th>
+          <td><input type="text" width="100%" style="text-align:left" name="text" value="${link.getValue()}" /></td>
+        </tr>
+        <tr>
+          <td>
+            <div align="right"><f:repeatableDeleteButton /></div>
+          </td>
+        </tr>
+      </table>
+    </f:repeatable>
+  </f:entry>
+
+</j:jelly>
+

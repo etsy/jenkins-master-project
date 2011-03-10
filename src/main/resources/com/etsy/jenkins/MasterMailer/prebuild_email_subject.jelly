@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<j:jelly
+    trim="false"
+    xmlns:j="jelly:core"
+    xmlns:x="jelly:xml"
+    xmlns:html="jelly:html">
+[${master.getDisplayName()}] Started #${master.getNumber()}
+</j:jelly>

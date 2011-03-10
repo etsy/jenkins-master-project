@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<j:jelly 
+    trim="false" 
+    xmlns:j="jelly:core" 
+    xmlns:x="jelly:xml" 
+    xmlns:html="jelly:html">
+
+<html>
+<head>
+  <title>${subject}</title>
+</head>
+<body>
+  <div>
+    ${preamble}
+  </div>
+  <!-- <div>
+    <ul style="list-style-type:none;">
+      <li>Cause(s)</li>
+      <li>${causes}</li>
+    </ul>
+  </div> -->
+  <div>
+    <table cellspacing="2">
+      <j:set var="builds" value="${master.getSubBuilds()}"/>
+      <j:foreach items="${builds}" var="build">
+        <tr>
+          <th style="color:${build.getIconColor().getHtmlBaseColor()};">
+            ${build.getResult().toString()}
+          </th>
+          <td>${build.getDisplayName()}</td>
+          <j:foreach items="${links}" var="link">
+            <td>
+              <a href="${rootURL}/${build.getUrl()}/${link.getUrl()}">
+                ${link.getText()}
+              </a>
+            </td>
+          </j:foreach>
+        </tr>
+      </j:foreach>
+    </table>
+  </div>
+</body>
+</html>
+
+</j:jelly>
+
