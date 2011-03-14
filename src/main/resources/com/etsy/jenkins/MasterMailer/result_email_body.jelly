@@ -13,6 +13,7 @@
   <div>
     ${preamble}
   </div>
+  <br/>
   <!-- <div>
     <ul style="list-style-type:none;">
       <li>Cause(s)</li>
@@ -21,22 +22,22 @@
   </div> -->
   <div>
     <table cellspacing="2">
-      <j:set var="builds" value="${master.getSubBuilds()}"/>
-      <j:foreach items="${builds}" var="build">
+      <j:set var="builds" value="${master.getLatestBuilds()}"/>
+      <j:forEach items="${builds}" var="build">
         <tr>
           <th style="color:${build.getIconColor().getHtmlBaseColor()};">
             ${build.getResult().toString()}
           </th>
-          <td>${build.getDisplayName()}</td>
-          <j:foreach items="${links}" var="link">
+          <td>${build.getProject().getDisplayName()}</td>
+          <j:forEach items="${links.entrySet()}" var="link">
             <td>
-              <a href="${rootURL}/${build.getUrl()}/${link.getUrl()}">
-                ${link.getText()}
+              <a href="${rootURL}${build.getUrl()}${link.getKey()}">
+                ${link.getValue()}
               </a>
             </td>
-          </j:foreach>
+          </j:forEach>
         </tr>
-      </j:foreach>
+      </j:forEach>
     </table>
   </div>
 </body>

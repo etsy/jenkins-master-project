@@ -56,7 +56,7 @@ import java.util.Set;
   }
 
   public Result getOverallResult() {
-    Result endResult = Result.SUCCESS;
+    Result endResult = (results.isEmpty()) ? Result.FAILURE : Result.SUCCESS;
     for (SubResult subResult : results.values()) {
       Result result = subResult.getResult();
       if (result == null) {

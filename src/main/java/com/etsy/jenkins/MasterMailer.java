@@ -6,6 +6,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Hudson;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -17,10 +18,12 @@ import hudson.tasks.Publisher;
 import org.kohsuke.stapler.StaplerRequest;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.apache.commons.jelly.JellyContext;
 import org.apache.commons.jelly.XMLOutput;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
@@ -42,6 +45,15 @@ public class MasterMailer extends Notifier {
   public String preamble;
   public Map<String, String> links;
 
+  public MasterMailer(
+      String recipients,
+      String preamble,
+      Map<String, String> links) {
+    this.recipients = recipients;
+    this.preamble = preamble;
+    this.links = links;
+  }
+
   @Override
   public boolean prebuild(AbstractBuild build, BuildListener listener) {
     MasterBuild master = (MasterBuild) build;
@@ -53,13 +65,13 @@ public class MasterMailer extends Notifier {
     JellyContext context = new JellyContext();
     context.setVariable("master", master);
     String subject = compileJelly(context, 
-        "com/etsy/jenkins/MasterMailer/prebuild_email_subject.jelly");
+        "prebuild_email_subject.jelly");
 
     context = new JellyContext();
     context.setVariable("subject", subject);
     context.setVariable("preamble", env.expand(preamble));
     String body = compileJelly(context, 
-        "com/etsy/jenkins/MasterMailer/prebuild_email_subject.jelly");
+        "prebuild_email_body.jelly");
   
     try { 
       MimeMessage message = sendMail(master, subject, body, listener);
@@ -93,15 +105,16 @@ public class MasterMailer extends Notifier {
     JellyContext context = new JellyContext();
     context.setVariable("master", master);
     String subject = compileJelly(context, 
-        "com/etsy/jenkins/MasterMailer/result_email_subject.jelly");
+        "result_email_subject.jelly");
 
     context = new JellyContext();
     context.setVariable("subject", subject);
     context.setVariable("preamble", env.expand(preamble));
     context.setVariable("master", master);
     context.setVariable("links", links);
+    context.setVariable("rootURL", Hudson.getInstance().getRootUrl());
     String body = compileJelly(context, 
-        "com/etsy/jenkins/MasterMailer/result_email_body.jelly");
+        "result_email_body.jelly");
 
     try {
       sendMail(build, subject, body, listener);
@@ -171,7 +184,10 @@ public class MasterMailer extends Notifier {
     StringWriter writer = new StringWriter();
     try {
       XMLOutput xmlOutput = XMLOutput.createXMLOutput(writer);
-      context.runScript("src/main/resources/" + template, xmlOutput);
+      String url = this.getClass()
+          .getResource("MasterMailer.class").toString();
+      url = url.substring(0, url.lastIndexOf(".class"));
+      context.runScript(url + "/" + template, xmlOutput);
       xmlOutput.flush();
     } catch (Exception e) {
       e.printStackTrace(new PrintWriter(writer));
@@ -197,7 +213,24 @@ public class MasterMailer extends Notifier {
 
     @Override
     public Publisher newInstance(StaplerRequest req, JSONObject formData) {
-      return new MasterMailer();
+      String recipients = formData.getString("recipients");
+      String preamble = formData.getString("preamble");
+      JSONArray linksData = formData.optJSONArray("links");
+      Map<String, String> links = Maps.<String, String>newHashMap();
+      if (linksData != null) {
+        for (int i=0; i < linksData.size(); i++) {
+          JSONObject linkData = linksData.getJSONObject(i);
+          if (linkData != null) {
+            links.put(linkData.getString("path"), linkData.getString("text"));
+          }
+        }
+      } else {
+        JSONObject linkData = formData.optJSONObject("links");
+        if (linkData != null) {
+          links.put(linkData.getString("path"), linkData.getString("text"));
+        }
+      }
+      return new MasterMailer(recipients, preamble, links);
     }
 
     @Override

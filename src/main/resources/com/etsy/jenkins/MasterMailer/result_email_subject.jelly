@@ -4,5 +4,5 @@
     xmlns:j="jelly:core"
     xmlns:x="jelly:xml"
     xmlns:html="jelly:html">
-[${master.getDisplayName()}] ${master.getResult().toString()} at #${master.getNumber()}
+[${master.getProject().getDisplayName()}] ${master.getResult().toString()} at #${master.getNumber()}
 </j:jelly>
