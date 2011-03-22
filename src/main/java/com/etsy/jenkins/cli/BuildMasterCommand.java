@@ -1,6 +1,11 @@
 package com.etsy.jenkins.cli;
 
+import com.etsy.jenkins.MasterProject;
 import com.etsy.jenkins.SubProjectsAction;
+import com.etsy.jenkins.SubProjectsJobProperty;
+import com.etsy.jenkins.cli.handlers.MasterProjectOptionHandler;
+import com.etsy.jenkins.finder.BuildFinder;
+import com.etsy.jenkins.finder.ProjectFinder;
 
 import hudson.AbortException;
 import hudson.EnvVars;
@@ -31,6 +36,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -39,7 +45,11 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 @Extension
-public class TryCommand extends CLICommand {
+public class BuildMasterCommand extends CLICommand {
+
+  @Inject static Hudson hudson;
+  @Inject static BuildFinder buildFinder;
+  @Inject static ProjectFinder projectFinder;
 
   @Override
   public String getShortDescription() {
@@ -47,16 +57,20 @@ public class TryCommand extends CLICommand {
         + " and optionally waits until its completion.";
   }
 
-  @Argument(metaVar="JOB", usage="Name of the job to build", required=true)
-  public AbstractProject<?, ?> job;
+  @Argument(
+      handler=MasterProjectOptionHandler.class,
+      metaVar="MASTER_JOB", 
+      usage="Name of the job to build", 
+      required=true)
+  public MasterProject job;
 
   @Argument(
-      metaVar="SUBJOBS",
+      metaVar="SUB_JOBS",
       usage="List of sub jobs to execute. If Master Project plugin is"
           + " installed and the JOB is a Master Project.",
       index=1,
       multiValued=true)
-  public SubProjectsAction subJobsAction;
+  public List<String> subJobs = Lists.<String>newArrayList();
 
   @Option(
       name="-s",
@@ -71,6 +85,38 @@ public class TryCommand extends CLICommand {
   @Override
   protected int run() throws Exception {
     job.checkPermission(Item.BUILD);
+
+    SubProjectsAction sp = null;
+    if (!subJobs.isEmpty()) {
+      SubProjectsJobProperty spjp =
+          job.getProperty(SubProjectsJobProperty.class);
+      if (spjp == null) {
+        throw new AbortException(
+            String.format(
+                "%s is does not allow sub-job selection but sub-jobs were"
+                + " specified.",
+                job.getDisplayName()));
+      }
+      Set<String> subProjects = Sets.<String>newHashSet();
+      for (String subJob : subJobs) {
+        AbstractProject project = projectFinder.findProject(subJob);
+        if (project == null) {
+          throw new AbortException(
+            String.format(
+                "Project does not exist: %s",
+                subJob));
+        }
+        if (!job.contains((TopLevelItem) project)) {
+          throw new AbortException(
+              String.format(
+                  "%s does not exist in Master Project: %s",
+                  subJob,
+                  job.getDisplayName()));
+        }
+        subProjects.add(subJob);
+      }
+      sp = new SubProjectsAction(subProjects);
+    }
 
     ParametersAction a = null;
     if (!parameters.isEmpty()) {
@@ -108,13 +154,13 @@ public class TryCommand extends CLICommand {
        user = User.getUnknown();
      }
      
-     CLICause cause = new CLICause(user, a);
+     CLICause cause = new CLICause(user, a, sp);
      Future<? extends AbstractBuild> f = 
-         job.scheduleBuild2(0, cause, a);
+         job.scheduleBuild2(0, cause, a, sp);
 
      AbstractBuild build = null;
      do {
-       build = findBuild(job, cause);
+       build = buildFinder.findBuild(job, cause);
        stdout.println(
            String.format("......... %s (pending)", job.getDisplayName()));
        rest();
@@ -123,7 +169,7 @@ public class TryCommand extends CLICommand {
      stdout.println(
          String.format("......... %s (%s%s%s)", 
           job.getDisplayName(),
-          Hudson.getInstance().getRootUrl(),
+          hudson.getRootUrl(),
           build.getUrl(),
           "console"));
      build.setDescription(cause.getUserName());
@@ -139,17 +185,6 @@ public class TryCommand extends CLICommand {
      return b.getResult().ordinal;
   }
 
-  private AbstractBuild findBuild(AbstractProject project, Cause cause) {
-    List<Run> builds = project.getBuilds();
-    for (Run build : builds) {
-      List<Cause> causes = build.getCauses();
-      if (causes.contains(cause)) {
-        return (AbstractBuild) build;
-      }
-    }
-    return null;
-  }
-
   private void rest() {
     try {
       Thread.sleep(7000L);
@@ -159,7 +194,7 @@ public class TryCommand extends CLICommand {
   @Override
   protected void printUsageSummary(PrintStream stderr) {
     stderr.println(
-        "Starts a try job, and optionally waits for a completion.\n\n"
+        "Starts a master job, and optionally waits for a completion.\n\n"
         + "Aside from general scripting use, this command can be\n"
         + "used to invoke another job from within a build of one job.\n"
         + "With the -s option, this command changes the exit code based on\n"
@@ -169,11 +204,16 @@ public class TryCommand extends CLICommand {
   public static class CLICause extends Cause {
 
     private final User user;
-    private final ParametersAction action;
+    private final ParametersAction parameters;
+    private final SubProjectsAction subProjects;
 
-    public CLICause(User user, ParametersAction action) {
+    public CLICause(
+        User user,
+        ParametersAction parameters,
+        SubProjectsAction subProjects) {
       this.user = user;
-      this.action = action;
+      this.parameters = parameters;
+      this.subProjects = subProjects;
     }
 
     @Exported(visibility=3)
@@ -205,12 +245,13 @@ public class TryCommand extends CLICommand {
       }
       CLICause other = (CLICause) o;
       return Objects.equal(this.user, other.user)
-          && Objects.equal(this.action, other.action);
+          && Objects.equal(this.parameters, other.parameters)
+          && Objects.equal(this.subProjects, other.subProjects);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(this.user, this.action);
+      return Objects.hashCode(this.user, this.parameters, this.subProjects);
     }
   }
 

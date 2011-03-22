@@ -1,5 +1,8 @@
 package com.etsy.jenkins;
 
+import com.etsy.jenkins.cli.BuildMasterCommand;
+import com.etsy.jenkins.cli.handlers.MasterProjectOptionHandler;
+
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 
@@ -35,7 +38,10 @@ import java.util.concurrent.Executors;
     requestStaticInjection(MasterProject.class);
     requestStaticInjection(MasterResult.class);
     requestStaticInjection(SubResult.class);
+    requestStaticInjection(SubProjectsAction.class);
     requestStaticInjection(SubProjectsJobProperty.class);
+    requestStaticInjection(BuildMasterCommand.class);
+    requestStaticInjection(MasterProjectOptionHandler.class);
   }
 
   @Provides CompletionService<AbstractBuild> providesCompletionService(

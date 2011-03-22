@@ -1,24 +1,31 @@
 package com.etsy.jenkins;
 
+import com.etsy.jenkins.finder.ProjectFinder;
+
 import hudson.model.Action;
 import hudson.model.AbstractProject;
+
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 
 import java.util.Set;
 
 public class SubProjectsAction implements Action {
 
-  private final Set<AbstractProject> subProjects;
+  @Inject static ProjectFinder projectFinder;
 
-  public SubProjectsAction(Set<AbstractProject> subProjects) {
+  private Set<String> subProjects;
+
+  public SubProjectsAction(Set<String> subProjects) {
     this.subProjects = subProjects;
   }
 
   public String getDisplayName() {
-    return "Build a selection of sub-jobs";
+    return "Selected Sub-jobs";
   }
 
   public String getIconFileName() {
-    return "documents-properties.gif";
+    return null;
   }
 
   public String getUrlName() {
@@ -26,7 +33,11 @@ public class SubProjectsAction implements Action {
   }
 
   public Set<AbstractProject> getSubProjects() {
-    return subProjects;
+    Set<AbstractProject> projects = Sets.<AbstractProject>newHashSet();
+    for (String subProject : subProjects) {
+      projects.add(projectFinder.findProject(subProject));
+    }
+    return projects;
   }
 }
 
