@@ -35,6 +35,7 @@ import java.util.concurrent.Executors;
     requestStaticInjection(MasterProject.class);
     requestStaticInjection(MasterResult.class);
     requestStaticInjection(SubResult.class);
+    requestStaticInjection(SubProjectsJobProperty.class);
   }
 
   @Provides CompletionService<AbstractBuild> providesCompletionService(

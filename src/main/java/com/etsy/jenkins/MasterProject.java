@@ -5,6 +5,7 @@ import com.etsy.jenkins.finder.ProjectFinder;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.AutoCompletionCandidates;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
@@ -14,16 +15,21 @@ import hudson.model.Project;
 import hudson.model.TopLevelItem;
 import hudson.model.TopLevelItemDescriptor;
 import hudson.model.listeners.ItemListener;
+import hudson.security.AccessControlled;
 import hudson.security.Permission;
 import hudson.tasks.Builder;
+import hudson.tasks.Messages;
 import hudson.tasks.Publisher;
+import hudson.util.FormValidation;
 
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -41,6 +47,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 import javax.servlet.ServletException;
 
 public class MasterProject
@@ -144,6 +151,50 @@ implements TopLevelItem {
     return (MasterBuild) this.getBuildByNumber(buildNumber);
   }
 
+  public FormValidation doCheck(
+      @AncestorInPath AccessControlled subject,
+      @QueryParameter String value) {
+    if (!subject.hasPermission(Item.CONFIGURE)) return FormValidation.ok();
+    StringTokenizer tokenizer = new StringTokenizer(value);
+    while (tokenizer.hasMoreTokens()) {
+      String projectName = tokenizer.nextToken().trim();
+      if (StringUtils.isNotBlank(projectName)) {
+        Item item = hudson.getItemByFullName(projectName, Item.class);
+        if (item == null) {
+          return FormValidation.error(
+              Messages.BuildTrigger_NoSuchProject(
+                  projectName, 
+                  AbstractProject.findNearest(projectName).getName()));
+        }
+        if (!(item instanceof AbstractProject)) {
+          return FormValidation.error(
+              Messages.BuildTrigger_NotBuildable(projectName));
+        }
+        if (!contains((TopLevelItem) item)) {
+          return FormValidation.error(
+              String.format(
+                  "%s is not a sub-job of this master project.",
+                  projectName));
+        }
+      }
+    }
+    return FormValidation.ok();
+  }
+
+  public AutoCompletionCandidates doAutoCompleteSubProjects(
+      @QueryParameter String value) {
+    AutoCompletionCandidates candidates = new AutoCompletionCandidates();
+    Set<AbstractProject> projects = getSubProjects();
+    for (AbstractProject project : projects) {
+      if (project.getFullName().startsWith(value)) {
+        if (project.hasPermission(Item.READ)) {
+          candidates.add(project.getFullName());
+        }
+      }
+    }
+    return candidates;
+  }
+
   @Override
   protected void submit(StaplerRequest req, StaplerResponse res) 
       throws IOException, ServletException, Descriptor.FormException {
@@ -175,6 +226,10 @@ implements TopLevelItem {
       subProjects.add(projectFinder.findProject(jobName));
     }
     return subProjects;
+  }
+
+  public Set<String> getSubProjectNames() {
+    return jobNames;
   }
 
   @Extension

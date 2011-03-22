@@ -40,8 +40,7 @@ import java.util.concurrent.ExecutionException;
       AbstractBuild build, Launcher launcher, BuildListener listener)
       throws InterruptedException, IOException {
     MasterBuild masterBuild = (MasterBuild) build;
-    MasterProject masterProject = (MasterProject) masterBuild.getProject();
-    Set<AbstractProject> subProjects = masterProject.getSubProjects();
+    Set<AbstractProject> subProjects = masterBuild.getSubProjects();
     Cause cause = new MasterBuildCause(masterBuild);
 
     scheduleBuilds(masterBuild, subProjects, cause, listener);

@@ -1,0 +1,17 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+  <t:summary icon="documents-properties.gif">
+    <j:set var="projects" value="${it.getSubProjects()}" />
+    <j:if test="${!empty(projects)}">
+      <ul style="list-style-type:none;">
+        <j:forEach var="project" items="${projects}">
+          <j:if test="${h.hasPermission(project, project.READ)}">
+            <li>
+              <t:jobLink job="${project}" />
+            </li>
+          </j:if>
+        </j:forEach>
+      </ul>
+    </j:if>
+  </t:summary>
+</j:jelly>

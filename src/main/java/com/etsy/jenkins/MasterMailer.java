@@ -144,7 +144,8 @@ public class MasterMailer extends Notifier {
         createAddress(Mailer.descriptor().getAdminAddress(), listener);
     message.setFrom(from);
     message.setReplyTo(new Address[] { from });
-    message.setRecipients(Message.RecipientType.TO, getRecipients(listener));
+    message.setRecipients(
+        Message.RecipientType.TO, getRecipients(build, listener));
     message.setSubject(subject);
     message.setText(body, "iso-8859-1", "html");
     
@@ -158,11 +159,12 @@ public class MasterMailer extends Notifier {
     return message;
   }
 
-  private Address[] getRecipients(TaskListener listener) {
+  private Address[] getRecipients(MasterBuild build, TaskListener listener) {
+    EnvVars env = getEnvironment(build, listener);
     List<Address> addresses = Lists.<Address>newArrayList();
     StringTokenizer tokenizer = new StringTokenizer(recipients);
     while (tokenizer.hasMoreTokens()) {
-      String address = tokenizer.nextToken();
+      String address = env.expand(tokenizer.nextToken());
       Address add = createAddress(address, listener);
       if (add != null) {
         addresses.add(add);

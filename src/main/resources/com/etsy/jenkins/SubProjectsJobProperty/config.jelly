@@ -1,0 +1,19 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
+
+  <f:optionalBlock 
+      name="subProjectsJobProperty" 
+      title="${%Allow building of select sub-jobs}"
+      checked="${instance!=null}">
+    <f:entry 
+        title="${%Default Project names}"
+        description="${%Multiple projects can be specified like 'abc def'}">
+      <f:textbox
+          name="subProjectsJobProperty.defaultSubProjects"
+          value="${instance.getDefaultSubProjectsString()}"
+          checkUrl="'check?value=' + encodeURIComponent(this.value)"
+          autoCompleteField="subProjectsJobProperty.defaultSubProjects" />
+    </f:entry>
+  </f:optionalBlock>
+</j:jelly>

@@ -34,6 +34,7 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
   @Inject static MasterRebuilder rebuilder;
 
   private MasterResult masterResult;
+  private Set<AbstractProject> subProjects;
 
   private transient List<Future<AbstractBuild>> futuresToAbort =
       Lists.<Future<AbstractBuild>>newArrayList();
@@ -41,6 +42,7 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
   public MasterBuild(MasterProject project) throws IOException {
     super(project);
     this.masterResult = masterResultProvider.get();
+    this.subProjects = project.getSubProjects();
   }
 
   public MasterBuild(MasterProject project, File file) throws IOException {
@@ -48,7 +50,11 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
   }
 
   public Set<AbstractProject> getSubProjects() {
-    return this.masterResult.getProjects();
+    return this.subProjects;
+  }
+
+  /*package*/ void setSubProjects(Set<AbstractProject> subProjects) {
+    this.subProjects = subProjects;
   }
 
   @Override
