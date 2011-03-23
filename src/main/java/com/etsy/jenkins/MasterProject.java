@@ -88,6 +88,11 @@ implements TopLevelItem {
   }
 
   @Override
+  public boolean isConcurrentBuild() {
+    return true;
+  }
+
+  @Override
   public List<Builder> getBuilders() {
     return Lists.<Builder>newArrayList(masterBuilderProvider.get());
   }
