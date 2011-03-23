@@ -1,6 +1,33 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project" xmlns:i="jelly:fmt">
 
+  <p:config-disableBuild/>
+  <j:if test="${app.CONCURRENT_BUILD}">
+    <f:optionalBlock field="concurrentBuild" title="${%title.concurrentbuilds}" />
+  </j:if>
+
+  <!-- master/slave -->
+  <j:if test="${app.labels.size() gt 1 || app.clouds.size() gt 0 || (it.assignedLabel!=null and it.assignedLabel!=app.selfLabel)}">
+    <f:optionalBlock name="hasSlaveAffinity" title="${%Restrict where this project can be run}" checked="${it.assignedLabel!=null}"
+        help="/help/project-config/slave.html">
+      <f:entry title="${%Label Expression}" field="assignedLabelString">
+        <f:textbox autoCompleteDelimChar=" "/>
+      </f:entry>
+    </f:optionalBlock>
+  </j:if>
+
+  <f:section title="${%Advanced Project Options configure-common}">
+    <f:advanced>
+      <p:config-quietPeriod />
+      <p:config-retryCount />
+      <p:config-blockWhenUpstreamBuilding />
+      <p:config-blockWhenDownstreamBuilding />
+      <st:include page="configure-advanced.jelly" optional="true" />
+    </f:advanced>
+  </f:section>
+
+  <p:config-buildWrappers />
+
   <f:section title="${%Sub-Jobs}">
     <f:block>
       <j:forEach var="job" items="${app.items}">
