@@ -15,6 +15,7 @@ import hudson.model.Project;
 import hudson.model.TopLevelItem;
 import hudson.model.TopLevelItemDescriptor;
 import hudson.model.listeners.ItemListener;
+import hudson.plugins.ircbot.IrcPublisher;
 import hudson.security.AccessControlled;
 import hudson.security.Permission;
 import hudson.tasks.Builder;
@@ -93,7 +94,12 @@ implements TopLevelItem {
   }
 
   public List<Descriptor<Publisher>> getPotentialPublisherDescriptors() {
-    return Lists.<Descriptor<Publisher>>newArrayList(MasterMailer.DESCRIPTOR);
+    List<Descriptor<Publisher>> publishers = 
+        Lists.<Descriptor<Publisher>>newArrayList(MasterMailer.DESCRIPTOR);
+    if (hudson.getPlugin("ircbot") != null) {
+      publishers.add(IrcPublisher.DESCRIPTOR);
+    }
+    return publishers;
   }
 
   @Override
