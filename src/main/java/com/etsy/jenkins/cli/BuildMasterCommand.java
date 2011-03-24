@@ -159,12 +159,12 @@ public class BuildMasterCommand extends CLICommand {
      do {
        build = buildFinder.findBuild(job, cause);
        stdout.println(
-           String.format("......... %s (pending)", job.getDisplayName()));
+           String.format("......... %s ( pending )", job.getDisplayName()));
        rest();
      } while(build == null);
 
      stdout.println(
-         String.format("......... %s (%s%s%s)", 
+         String.format("......... %s ( %s%s%s )", 
           job.getDisplayName(),
           hudson.getRootUrl(),
           build.getUrl(),
