@@ -1,5 +1,7 @@
 package com.etsy.jenkins;
 
+import com.etsy.jenkins.finder.ProjectFinder;
+
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
@@ -32,9 +34,10 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
 
   @Inject static Provider<MasterResult> masterResultProvider;
   @Inject static MasterRebuilder rebuilder;
+  @Inject static ProjectFinder projectFinder;
 
   private MasterResult masterResult;
-  private Set<AbstractProject> subProjects;
+  private Set<String> subProjects;
 
   private transient List<Future<AbstractBuild>> futuresToAbort =
       Lists.<Future<AbstractBuild>>newArrayList();
@@ -42,7 +45,7 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
   public MasterBuild(MasterProject project) throws IOException {
     super(project);
     this.masterResult = masterResultProvider.get();
-    this.subProjects = project.getSubProjects();
+    this.subProjects = project.getSubProjectNames();
   }
 
   public MasterBuild(MasterProject project, File file) throws IOException {
@@ -50,10 +53,17 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
   }
 
   public Set<AbstractProject> getSubProjects() {
-    return this.subProjects;
+    Set<AbstractProject> projects = Sets.<AbstractProject>newHashSet();
+    for (String subProject : subProjects) {
+      AbstractProject project = projectFinder.findProject(subProject);
+      if (project != null) {
+        projects.add(project);
+      }
+    }
+    return projects;
   }
 
-  /*package*/ void setSubProjects(Set<AbstractProject> subProjects) {
+  /*package*/ void setSubProjects(Set<String> subProjects) {
     this.subProjects = subProjects;
   }
 

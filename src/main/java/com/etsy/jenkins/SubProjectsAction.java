@@ -2,8 +2,8 @@ package com.etsy.jenkins;
 
 import com.etsy.jenkins.finder.ProjectFinder;
 
-import hudson.model.Action;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -32,10 +32,15 @@ public class SubProjectsAction implements Action {
     return "subJobs";
   }
 
+  public Set<String> getSubProjectNames() {
+    return subProjects;
+  }
+
   public Set<AbstractProject> getSubProjects() {
     Set<AbstractProject> projects = Sets.<AbstractProject>newHashSet();
     for (String subProject : subProjects) {
-      projects.add(projectFinder.findProject(subProject));
+      AbstractProject project = projectFinder.findProject(subProject);
+      projects.add(project);
     }
     return projects;
   }

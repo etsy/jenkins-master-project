@@ -149,10 +149,7 @@ public class BuildMasterCommand extends CLICommand {
        a = new ParametersAction(values);
      }
 
-     User user = User.get(Hudson.getAuthentication().getName());
-     if (user == null) {
-       user = User.getUnknown();
-     }
+     String user = Hudson.getAuthentication().getName();
      
      CLICause cause = new CLICause(user, a, sp);
      Future<? extends AbstractBuild> f = 
@@ -203,12 +200,12 @@ public class BuildMasterCommand extends CLICommand {
 
   public static class CLICause extends Cause {
 
-    private final User user;
+    private final String user;
     private final ParametersAction parameters;
     private final SubProjectsAction subProjects;
 
     public CLICause(
-        User user,
+        String user,
         ParametersAction parameters,
         SubProjectsAction subProjects) {
       this.user = user;
@@ -218,12 +215,17 @@ public class BuildMasterCommand extends CLICommand {
 
     @Exported(visibility=3)
     public String getUserName() {
-      return user.getDisplayName();
+      User u = User.get(user, false);
+      return (u == null) ? user : u.getDisplayName();
     }
 
     @Exported(visibility=3)
     public String getUserUrl() {
-      return user.getAbsoluteUrl();
+      User u = User.get(user, false);
+      if (u == null) {
+        u = User.getUnknown();
+      }
+      return u.getAbsoluteUrl();
     }
 
     @Override

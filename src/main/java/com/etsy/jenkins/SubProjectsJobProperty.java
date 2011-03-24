@@ -30,7 +30,6 @@ import java.util.StringTokenizer;
 public class SubProjectsJobProperty extends JobProperty<MasterProject> {
 
   @Inject static Hudson hudson;
-  @Inject static ProjectFinder projectFinder;
 
   private final String defaultSubProjects;
 
@@ -42,7 +41,7 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
   public boolean prebuild(AbstractBuild build, BuildListener listener) {
     SubProjectsAction action = build.getAction(SubProjectsAction.class);
     if (action != null) {
-      ((MasterBuild) build).setSubProjects(action.getSubProjects());
+      ((MasterBuild) build).setSubProjects(action.getSubProjectNames());
     } else {
       ((MasterBuild) build).setSubProjects(getDefaultSubProjects());
     }
@@ -53,15 +52,15 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
     return defaultSubProjects;
   }
 
-  private Set<AbstractProject> getDefaultSubProjects() {
+  private Set<String> getDefaultSubProjects() {
     if (defaultSubProjects == null || defaultSubProjects.isEmpty()) {
-      return getMasterProject().getSubProjects();
+      return getMasterProject().getSubProjectNames();
     }
 
-    Set<AbstractProject> projects = Sets.<AbstractProject>newHashSet();
+    Set<String> projects = Sets.<String>newHashSet();
     StringTokenizer tokenizer = new StringTokenizer(defaultSubProjects);
     while (tokenizer.hasMoreTokens()) {
-      projects.add(projectFinder.findProject(tokenizer.nextToken()));
+      projects.add(tokenizer.nextToken());
     }
     return projects;
   }
