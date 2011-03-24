@@ -25,7 +25,25 @@
       <j:set var="builds" value="${master.getLatestBuilds()}"/>
       <j:forEach items="${builds}" var="build">
         <tr>
-          <th style="color:${build.getIconColor().getHtmlBaseColor()};">
+          <j:getStatic var="SUCCESS" 
+              className="hudson.model.Result" field="SUCCESS" />
+          <j:getStatic var="FAILURE"
+              className="hudson.model.Result" field="FAILURE" />
+          <j:getStatic var="UNSTABLE"
+              className="hudson.model.Result" field="UNSTABLE" />
+          <j:set var="statusColor" value="dimGray" />
+          <j:switch on="${build.getResult()}">
+            <j:case value="${SUCCESS}">
+              <j:set var="statusColor" value="green" />
+            </j:case>
+            <j:case value="${FAILURE}">
+              <j:set var="statusColor" value="red" />
+            </j:case>
+            <j:case value="${UNSTABLE}">
+              <j:set var="statusColor" value="gold" />
+            </j:case>
+          </j:switch>
+          <th style="color:${statusColor};">
             ${build.getResult().toString()}
           </th>
           <td>${build.getProject().getDisplayName()}</td>

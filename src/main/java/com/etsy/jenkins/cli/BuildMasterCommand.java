@@ -169,7 +169,7 @@ public class BuildMasterCommand extends CLICommand {
           hudson.getRootUrl(),
           build.getUrl(),
           "console"));
-     build.setDescription(cause.getUserName());
+     build.setDescription("<h2>" + cause.getUserName() + "</h2>");
 
      if (!sync) return 0;
 
