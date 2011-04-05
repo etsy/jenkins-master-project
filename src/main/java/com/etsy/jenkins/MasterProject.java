@@ -16,6 +16,7 @@ import hudson.model.TopLevelItem;
 import hudson.model.TopLevelItemDescriptor;
 import hudson.model.listeners.ItemListener;
 import hudson.plugins.ircbot.IrcPublisher;
+import hudson.plugins.postbuildtask.PostbuildTask;
 import hudson.security.AccessControlled;
 import hudson.security.Permission;
 import hudson.tasks.Builder;
@@ -98,6 +99,9 @@ implements TopLevelItem {
         Lists.<Descriptor<Publisher>>newArrayList(MasterMailer.DESCRIPTOR);
     if (hudson.getPlugin("ircbot") != null) {
       publishers.add(IrcPublisher.DESCRIPTOR);
+    }
+    if (hudson.getPlugin("postbuild-task") != null) {
+        publishers.add(new PostbuildTask.DescriptorImpl());
     }
     return publishers;
   }
