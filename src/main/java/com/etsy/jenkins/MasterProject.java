@@ -101,7 +101,7 @@ implements TopLevelItem {
       publishers.add(IrcPublisher.DESCRIPTOR);
     }
     if (hudson.getPlugin("postbuild-task") != null) {
-        publishers.add(new PostbuildTask.DescriptorImpl());
+      publishers.add(new PostbuildTask().getDescriptor());
     }
     return publishers;
   }

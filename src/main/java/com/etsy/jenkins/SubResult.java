@@ -55,10 +55,12 @@ import java.util.TreeSet;
       int buildNumber = it.next();
       AbstractBuild build = buildFinder
           .findBuild(getProjectName(), buildNumber);
-      if (build == null) {
-        return result;
+      if (build != null) {
+        result = build.getResult();
+        if (result != Result.NOT_BUILT) {
+          return result;
+        }
       }
-      result = build.getResult();
     }
 
     return result;
