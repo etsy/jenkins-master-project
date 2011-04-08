@@ -64,14 +64,13 @@
            border="0" />
     </a>
   </td>
-  <td width="50px" align="center"> <!-- Rebuild link -->
+  <td width="70px" align="center"> <!-- Rebuild link -->
     <j:getStatic var="success" className="hudson.model.Result" field="SUCCESS"/>
     <j:choose>
       <j:when test="${b.getResult().isWorseThan(success)}">
         <a href="javascript:void(0)"
            onclick="rebuild('${b.getProject().getDisplayName()}');">
-          <img border="0" title="${%Rebuild}" alt="${%Rebuild}"
-               src="${imagesURL}/${subIconSize}/clock.png" />
+           <h3 style="color:red;">REBUILD</h3>
         </a>
       </j:when>
       <j:otherwise>
