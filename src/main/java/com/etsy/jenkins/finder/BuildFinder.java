@@ -26,6 +26,7 @@ public class BuildFinder {
   }
 
   public AbstractBuild findBuild(AbstractProject project, int buildNumber) {
+    if (project == null) return null;
     return (AbstractBuild) project.getBuildByNumber(buildNumber);
   }
 
@@ -35,6 +36,7 @@ public class BuildFinder {
   }
 
   public AbstractBuild findBuild(AbstractProject project, Cause cause) {
+    if (project == null) return null;
     List<Run> builds = project.getBuilds();
     for (Run build : builds) {
       List<Cause> causes = build.getCauses();
