@@ -18,10 +18,26 @@
           }
       );
 
+      var div = document.getElementById("rebuildButter");
+      if (div.hasChildNodes()) {
+          while (div.childNodes.length >= 1) {
+               div.removeChild(div.firstChild);
+          }
+      }
+      var h3 = document.createElement("h3");
+      h3.style.backgroundColor = "yellow";
+      h3.style.textAlign = "center";
+      var txt = document.createTextNode("Rebuilding " + projectName);
+      h3.appendChild(txt);
+      div.appendChild(h3);
+
       return false;
     }
   </script>
 
+  <div id="rebuildButter">
+      <h3><st:nbsp/></h3>
+  </div>
   <h2>${%Latest Builds}</h2>
   <t:setIconSize/>
   <table class="sortable pane bigtable" id="latestBuilds">
