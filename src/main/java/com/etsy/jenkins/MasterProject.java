@@ -24,6 +24,8 @@ import hudson.tasks.Messages;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 
+import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
+
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -101,8 +103,12 @@ implements TopLevelItem {
       publishers.add(IrcPublisher.DESCRIPTOR);
     }
     if (hudson.getPlugin("postbuild-task") != null) {
-      publishers.add(new PostbuildTask().getDescriptor());
+      publishers.add(hudson.getPublisher("PostbuildTask"));
     }
+    if (hudson.getPlugin("build-pipeline-plugin") != null) {
+      publishers.add(hudson.getPublisher("BuildPipelineTrigger"));
+    }
+
     return publishers;
   }
 
