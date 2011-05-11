@@ -12,6 +12,13 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
+  <repositories>
+    <repository>
+      <id>m.g.o-public</id>
+      <url>http://maven.glassfish.org/content/groups/public/</url>
+    </repository>
+  </repositories>
+
   <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
   <dependencies>
     <dependency>
