@@ -94,7 +94,13 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
     return masterResult.getLatestBuilds();
   }
 
-  public void rebuild(AbstractProject project) {
+  public void rebuild(AbstractProject project) throws ServletException {
+    if (!getSubProjects().contains(project)) {
+        throw new ServletException(
+            "Not a sub-project of this master build: " 
+            + project.getDisplayName());
+    }
+
     SubResult subResult = masterResult.getResult(project.getDisplayName());
     int rebuildNumber = subResult.getBuildNumbers().size();
     Cause cause = new MasterBuildCause(this, rebuildNumber);

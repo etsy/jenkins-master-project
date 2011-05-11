@@ -134,11 +134,6 @@ implements TopLevelItem {
       throw new ServletException("Project does not exist: " + subProjectName);
     }
 
-    if (!this.contains((TopLevelItem) subProject)) {
-      throw new ServletException(
-          "Not a sub-project of this master project: " + subProjectName);
-    }
-
     return subProject;
   }
 
