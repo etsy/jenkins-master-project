@@ -87,13 +87,13 @@ public class BuildMasterCommand extends CLICommand {
     job.checkPermission(Item.BUILD);
 
     SubProjectsAction sp = null;
+    SubProjectsJobProperty spjp = (SubProjectsJobProperty)
+        job.getProperty(SubProjectsJobProperty.class);
     if (!subJobs.isEmpty()) {
-      SubProjectsJobProperty spjp =
-          job.getProperty(SubProjectsJobProperty.class);
       if (spjp == null) {
         throw new AbortException(
             String.format(
-                "%s is does not allow sub-job selection but sub-jobs were"
+                "%s does not allow sub-job selection but sub-jobs were"
                 + " specified.",
                 job.getDisplayName()));
       }
@@ -116,6 +116,11 @@ public class BuildMasterCommand extends CLICommand {
         subProjects.add(subJob);
       }
       sp = new SubProjectsAction(subProjects);
+    } else if (spjp != null) {
+      stdout.println(
+          String.format(
+              "Executing DEFAULT sub-jobs: %s", 
+              spjp.getDefaultSubProjectsString()));
     }
 
     ParametersAction a = null;
