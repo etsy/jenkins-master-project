@@ -4,7 +4,7 @@
 
   <f:optionalBlock 
       name="subProjectsJobProperty" 
-      title="${%Allow building of select sub-jobs}"
+      title="${%Allow building and hiding of select sub-jobs}"
       checked="${instance!=null}">
     <f:entry 
         title="${%Default Project names}"
@@ -14,6 +14,15 @@
           value="${instance.getDefaultSubProjectsString()}"
           checkUrl="'check?value=' + encodeURIComponent(this.value)"
           autoCompleteField="subProjectsJobProperty.defaultSubProjects" />
+    </f:entry>
+    <f:entry 
+        title="${%Hidden Project names}"
+        description="${%Multiple projects can be specified like 'abc def'}">
+      <f:textbox
+          name="subProjectsJobProperty.hiddenSubProjects"
+          value="${instance.getHiddenSubProjectsString()}"
+          checkUrl="'check?value=' + encodeURIComponent(this.value)"
+          autoCompleteField="subProjectsJobProperty.hiddenSubProjects" />
     </f:entry>
   </f:optionalBlock>
 </j:jelly>

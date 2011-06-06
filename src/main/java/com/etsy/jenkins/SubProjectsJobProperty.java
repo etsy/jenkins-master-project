@@ -32,10 +32,14 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
   @Inject static Hudson hudson;
 
   private final String defaultSubProjects;
+  private final String hiddenSubProjects;
 
   @DataBoundConstructor
-  public SubProjectsJobProperty(String defaultSubProjects) {
+  public SubProjectsJobProperty(
+      String defaultSubProjects,
+      String hiddenSubProjects) {
     this.defaultSubProjects = defaultSubProjects;
+    this.hiddenSubProjects = hiddenSubProjects;
   }
 
   public boolean prebuild(AbstractBuild build, BuildListener listener) {
@@ -45,6 +49,7 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
     } else {
       ((MasterBuild) build).setSubProjects(getDefaultSubProjects());
     }
+    ((MasterBuild) build).setHiddenSubProjects(getHiddenSubProjects());
     return true;
   }
 
@@ -53,12 +58,31 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
   }
 
   private Set<String> getDefaultSubProjects() {
+    Set<String> projects = Sets.<String>newHashSet();
     if (defaultSubProjects == null || defaultSubProjects.isEmpty()) {
-      return getMasterProject().getSubProjectNames();
+      projects = getMasterProject().getSubProjectNames();
+    } else {
+      projects = getProjectsFromString(getDefaultSubProjectsString());
     }
 
+    for (String hidden : getHiddenSubProjects()) {
+      projects.remove(hidden);
+    }
+
+    return projects;
+  }
+
+  public String getHiddenSubProjectsString() {
+    return (hiddenSubProjects == null) ? "" : hiddenSubProjects;
+  }
+
+  private Set<String> getHiddenSubProjects() {
+    return getProjectsFromString(getHiddenSubProjectsString());
+  }
+
+  private Set<String> getProjectsFromString(String projectsString) {
     Set<String> projects = Sets.<String>newHashSet();
-    StringTokenizer tokenizer = new StringTokenizer(defaultSubProjects);
+    StringTokenizer tokenizer = new StringTokenizer(projectsString);
     while (tokenizer.hasMoreTokens()) {
       projects.add(tokenizer.nextToken());
     }
@@ -80,7 +104,7 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
 
     @Override
     public String getDisplayName() {
-      return "Allow building a selection of sub-jobs.";
+      return "Allow building and hiding a selection of sub-jobs.";
     }
 
     @Override
@@ -97,7 +121,8 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
         return null;
       }
       String subProjects = property.getString("defaultSubProjects");
-      return new SubProjectsJobProperty(subProjects);
+      String hiddenProjects = property.getString("hiddenSubProjects");
+      return new SubProjectsJobProperty(subProjects, hiddenProjects);
     }
   }
 }

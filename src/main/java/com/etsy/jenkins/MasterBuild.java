@@ -38,6 +38,7 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
 
   private MasterResult masterResult;
   private Set<String> subProjects;
+  private Set<String> hiddenSubProjects;
 
   private transient List<Future<AbstractBuild>> futuresToAbort =
       Lists.<Future<AbstractBuild>>newArrayList();
@@ -46,6 +47,7 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
     super(project);
     this.masterResult = masterResultProvider.get();
     this.subProjects = project.getSubProjectNames();
+    this.hiddenSubProjects = Sets.<String>newHashSet();
   }
 
   public MasterBuild(MasterProject project, File file) throws IOException {
@@ -53,7 +55,24 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
   }
 
   public Set<AbstractProject> getSubProjects() {
+    return getProjectsByNames(this.subProjects);
+  }
+
+  /*package*/ void setSubProjects(Set<String> subProjects) {
+    this.subProjects = subProjects;
+  }
+
+  public Set<AbstractProject> getHiddenSubProjects() {
+    return getProjectsByNames(this.hiddenSubProjects);
+  }
+
+  /*package*/ void setHiddenSubProjects(Set<String> subProjects) {
+    this.hiddenSubProjects = subProjects;
+  }
+
+  private Set<AbstractProject> getProjectsByNames(Set<String> subProjects) {
     Set<AbstractProject> projects = Sets.<AbstractProject>newHashSet();
+
     for (String subProject : subProjects) {
       AbstractProject project = projectFinder.findProject(subProject);
       if (project != null) {
@@ -63,9 +82,6 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
     return projects;
   }
 
-  /*package*/ void setSubProjects(Set<String> subProjects) {
-    this.subProjects = subProjects;
-  }
 
   @Override
   public void setResult(Result result) {

@@ -41,9 +41,13 @@ import java.util.concurrent.ExecutionException;
       throws InterruptedException, IOException {
     MasterBuild masterBuild = (MasterBuild) build;
     Set<AbstractProject> subProjects = masterBuild.getSubProjects();
+    Set<AbstractProject> hiddenSubProjects = masterBuild.getHiddenSubProjects();
+
     Cause cause = new MasterBuildCause(masterBuild);
 
     scheduleBuilds(masterBuild, subProjects, cause, listener);
+
+    scheduleHiddenBuilds(masterBuild, hiddenSubProjects, cause, listener);
 
     waitForBuilds(masterBuild, subProjects, cause, listener);
 
@@ -56,15 +60,35 @@ import java.util.concurrent.ExecutionException;
       Cause cause,
       BuildListener listener) {
     for (AbstractProject subProject : subProjects) {
-      ParametersAction[] parametersActions =
-          parametersActionPropagator
-              .getPropagatedActions(masterBuild, subProject);
       Future<AbstractBuild> future =
-          subProject.scheduleBuild2(0, cause, parametersActions);
+          scheduleBuild(masterBuild, subProject, cause, listener);
       masterBuild.addFuture(future);
-      listener.getLogger().printf("Build scheduled: %s\n", 
-          subProject.getDisplayName());
     }
+  }
+
+  /*package*/ void scheduleHiddenBuilds(
+      MasterBuild masterBuild,
+      Set<AbstractProject> subProjects,
+      Cause cause,
+      BuildListener listener) {
+    for (AbstractProject subProject : subProjects) {
+      scheduleBuild(masterBuild, subProject, cause, listener);
+    }
+  }
+
+  /*package*/ Future<AbstractBuild> scheduleBuild(
+      MasterBuild masterBuild,
+      AbstractProject subProject,
+      Cause cause,
+      BuildListener listener) {
+    ParametersAction[] parametersActions =
+        parametersActionPropagator
+            .getPropagatedActions(masterBuild, subProject);
+    Future<AbstractBuild> future =
+        subProject.scheduleBuild2(0, cause, parametersActions);
+    listener.getLogger().printf("Build scheduled: %s\n", 
+        subProject.getDisplayName());
+    return future;
   }
 
   /*package*/ Set<AbstractBuild> waitForBuilds(MasterBuild masterBuild,
