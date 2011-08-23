@@ -9,18 +9,22 @@ import hudson.model.Cause;
 import hudson.model.Hudson;
 import hudson.model.Result;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import java.io.PrintStream;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
-public class BuildWatcher implements Callable<AbstractBuild> {
+public class BuildWatcher implements Runnable {
 
   public static interface Factory {
     BuildWatcher create(
         MasterBuild masterBuild,
-        AbstractProject project,
+        Set<AbstractProject> projects,
         Cause cause,
         BuildListener listener);
   }
@@ -30,21 +34,21 @@ public class BuildWatcher implements Callable<AbstractBuild> {
   private final long pingTime;
 
   private final MasterBuild masterBuild;
-  private final AbstractProject project;
+  private final Set<AbstractProject> projects;
   private final Cause cause;
   private final BuildListener listener;
 
   @Inject
   public BuildWatcher(
       @Assisted MasterBuild masterBuild,
-      @Assisted AbstractProject project,
+      @Assisted Set<AbstractProject> projects,
       @Assisted Cause cause,
       @Assisted BuildListener listener,
       Hudson hudson,
       BuildFinder buildFinder,
       @MasterProject.PingTime long pingTime) {
     this.masterBuild = masterBuild;
-    this.project = project;
+    this.projects = projects;
     this.cause = cause;
     this.listener = listener;
 
@@ -53,40 +57,52 @@ public class BuildWatcher implements Callable<AbstractBuild> {
     this.pingTime = pingTime;
   }
 
-  public AbstractBuild call() {
+  public void run() {
     PrintStream logger = listener.getLogger();
 
-    AbstractBuild build = null;
+    Map<AbstractProject, AbstractBuild> projectBuildMap = 
+        Maps.<AbstractProject, AbstractBuild>newHashMap();
+    Set<AbstractProject> completed = Sets.<AbstractProject>newHashSet();
     do {
-      build = buildFinder.findBuild(project, cause);
-      logger.printf("......... %s (pending)\n", project.getDisplayName());
+      for (AbstractProject project : projects) {
+          AbstractBuild build = projectBuildMap.get(project);
+          if (build != null) {
+              if (build.isBuilding()) {
+                  logger.printf("......... %s (%s%s%s)\n", 
+                      project.getDisplayName(),
+                      hudson.getRootUrl(),
+                      build.getUrl(),
+                      "console");
+              } else if (!completed.contains(project)) {
+                  completed.add(project);
+                  Result result = build.getResult();
+                  String page = "testReport";
+                  if (result.isWorseThan(Result.UNSTABLE)) {
+                      page = "console";
+                  }
+                  logger.printf("[%s] %s (%s%s%s)\n", 
+                      result, 
+                      project.getDisplayName(),
+                      hudson.getRootUrl(),
+                      build.getUrl(),
+                      page);
+              }
+          } else {
+              build = buildFinder.findBuild(project, cause);
+              if (build != null) {
+                  masterBuild.addSubBuild(
+                      project.getDisplayName(),
+                      build.getNumber());
+                  projectBuildMap.put(project, build);
+              } else {
+                  logger.printf(
+                      "......... %s (pending)\n", 
+                      project.getDisplayName());
+              }
+          }
+      }
       rest();
-    } while (build == null);
-
-    masterBuild.addSubBuild(project.getDisplayName(), build.getNumber());
-
-    while (build.isBuilding()) {
-      logger.printf("......... %s (%s%s%s)\n", 
-          project.getDisplayName(),
-          hudson.getRootUrl(),
-          build.getUrl(),
-          "console");
-      rest();
-    }
-
-    Result result = build.getResult();
-    String page = "testReport";
-    if (result.isWorseThan(Result.UNSTABLE)) {
-        page = "console";
-    }
-    logger.printf("[%s] %s (%s%s%s)\n", 
-        result, 
-        project.getDisplayName(),
-        hudson.getRootUrl(),
-        build.getUrl(),
-        page);
-
-    return build;
+    } while (!completed.containsAll(projects));
   }
 
   private void rest() {

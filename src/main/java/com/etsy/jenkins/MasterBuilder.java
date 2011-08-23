@@ -15,23 +15,23 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /*package*/ class MasterBuilder extends Builder {
 
   private final BuildWatcher.Factory buildWatcherFactory;
-  private final CompletionService<AbstractBuild> completionService;
+  private final ExecutorService executorService;
   private final ParametersActionPropagator parametersActionPropagator;
 
   @Inject
   public MasterBuilder(
       BuildWatcher.Factory buildWatcherFactory,
-      CompletionService<AbstractBuild> completionService,
+      ExecutorService executorService,
       ParametersActionPropagator parametersActionPropagator) {
     this.buildWatcherFactory = buildWatcherFactory;
-    this.completionService = completionService;
+    this.executorService = executorService;
     this.parametersActionPropagator = parametersActionPropagator;
   }
 
@@ -91,29 +91,18 @@ import java.util.concurrent.ExecutionException;
     return future;
   }
 
-  /*package*/ Set<AbstractBuild> waitForBuilds(MasterBuild masterBuild,
+  /*package*/ void waitForBuilds(MasterBuild masterBuild,
       Set<AbstractProject> subProjects, Cause cause, BuildListener listener) {
-    
-    Set<AbstractBuild> builds = Sets.<AbstractBuild>newHashSet();
-
-    for (AbstractProject subProject : subProjects) {
-      BuildWatcher watcher = 
-          buildWatcherFactory.create(masterBuild, subProject, cause, listener);
-      completionService.submit(watcher);
+    BuildWatcher watcher = 
+        buildWatcherFactory.create(masterBuild, subProjects, cause, listener);
+    try {
+      Future<?> future = executorService.submit(watcher);
+      future.get();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
-    
-    for (int i = 0; i < subProjects.size(); i++) {
-      try {
-        AbstractBuild build = completionService.take().get();
-        builds.add(build);
-      } catch (ExecutionException ignore) {
-        // TODO
-      } catch (InterruptedException ignore) {
-        // TODO
-      }
-    }
-
-    return builds;
   }
 }
 

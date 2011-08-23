@@ -11,10 +11,9 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
 
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 /*package*/ class MasterModule extends AbstractModule {
 
@@ -30,7 +29,9 @@ import java.util.concurrent.Executors;
                 RebuildWatcher.Factory.class, RebuildWatcher.class));
     bindConstant().annotatedWith(MasterProject.PingTime.class).to(7000L);
 
-    Executor executor = Executors.newFixedThreadPool(25);
+    ExecutorService executor = Executors.newFixedThreadPool(25);
+    bind(ExecutorService.class)
+        .toInstance(executor);
     bind(Executor.class)
         .toInstance(executor);
 
@@ -42,11 +43,6 @@ import java.util.concurrent.Executors;
     requestStaticInjection(SubProjectsJobProperty.class);
     requestStaticInjection(BuildMasterCommand.class);
     requestStaticInjection(MasterProjectOptionHandler.class);
-  }
-
-  @Provides CompletionService<AbstractBuild> providesCompletionService(
-       Executor executor) {
-    return new ExecutorCompletionService<AbstractBuild>(executor);
   }
 }
 
