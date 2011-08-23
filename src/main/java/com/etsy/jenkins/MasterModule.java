@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
                 RebuildWatcher.Factory.class, RebuildWatcher.class));
     bindConstant().annotatedWith(MasterProject.PingTime.class).to(7000L);
 
-    Executor executor = Executors.newCachedThreadPool();
+    Executor executor = Executors.newFixedThreadPool(25);
     bind(Executor.class)
         .toInstance(executor);
 
