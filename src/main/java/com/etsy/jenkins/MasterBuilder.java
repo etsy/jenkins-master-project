@@ -1,5 +1,6 @@
 package com.etsy.jenkins;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -7,6 +8,7 @@ import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.ParametersAction;
 import hudson.tasks.Builder;
+import hudson.tasks.BuildStepDescriptor;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -102,6 +104,24 @@ import java.util.concurrent.Future;
       e.printStackTrace();
     } catch (InterruptedException e) {
       e.printStackTrace();
+    }
+  }
+
+  @Override
+  public DescriptorImpl getDescriptor() {
+    return (DescriptorImpl) super.getDescriptor();
+  }
+
+  @Extension
+  public static class DescriptorImpl extends BuildStepDescriptor<Builder> {
+    @Override
+    public String getDisplayName() {
+      return "Execute multiple sub-projects";
+    }
+
+    @Override
+    public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+      return MasterProject.class.equals(jobType);
     }
   }
 }
