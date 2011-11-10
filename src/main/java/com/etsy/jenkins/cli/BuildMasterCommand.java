@@ -98,7 +98,13 @@ public class BuildMasterCommand extends CLICommand {
                 job.getDisplayName()));
       }
       Set<String> subProjects = Sets.<String>newHashSet();
+      Set<String> excludeProjects = Sets.<String>newHashSet();
       for (String subJob : subJobs) {
+        boolean exclude = false;
+        if  (subJob.charAt(0) == '-') {
+            exclude = true;
+            subJob = subJob.substring(1, subJob.length());
+        }
         AbstractProject project = projectFinder.findProject(subJob);
         if (project == null) {
           throw new AbortException(
@@ -113,9 +119,13 @@ public class BuildMasterCommand extends CLICommand {
                   subJob,
                   job.getDisplayName()));
         }
-        subProjects.add(subJob);
+        if (exclude) {
+          excludeProjects.add(subJob);
+        } else {
+          subProjects.add(subJob);
+        }
       }
-      sp = new SubProjectsAction(subProjects);
+      sp = new SubProjectsAction(subProjects, excludeProjects);
     } else if (spjp != null) {
       stdout.println(
           String.format(

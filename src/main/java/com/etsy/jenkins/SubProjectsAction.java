@@ -15,9 +15,13 @@ public class SubProjectsAction implements Action {
   @Inject static ProjectFinder projectFinder;
 
   private Set<String> subProjects;
+  private Set<String> excludeProjects;
 
-  public SubProjectsAction(Set<String> subProjects) {
+  public SubProjectsAction(
+      Set<String> subProjects,
+      Set<String> excludeProjects) {
     this.subProjects = subProjects;
+    this.excludeProjects = excludeProjects;
   }
 
   public String getDisplayName() {
@@ -36,6 +40,10 @@ public class SubProjectsAction implements Action {
     return subProjects;
   }
 
+  public Set<String> getExcludeProjectNames() {
+    return excludeProjects;
+  }
+
   public Set<AbstractProject> getSubProjects() {
     Set<AbstractProject> projects = Sets.<AbstractProject>newHashSet();
     for (String subProject : subProjects) {
@@ -44,5 +52,6 @@ public class SubProjectsAction implements Action {
     }
     return projects;
   }
+
 }
 

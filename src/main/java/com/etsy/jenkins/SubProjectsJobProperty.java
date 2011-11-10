@@ -47,7 +47,9 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
     if (action != null) {
       ((MasterBuild) build).setSubProjects(action.getSubProjectNames());
     } else {
-      ((MasterBuild) build).setSubProjects(getDefaultSubProjects());
+      ((MasterBuild) build).setSubProjects(
+          getDefaultSubProjects(
+              action.getExcludeProjectNames()));
     }
     ((MasterBuild) build).setHiddenSubProjects(getHiddenSubProjects());
     return true;
@@ -57,7 +59,7 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
     return defaultSubProjects;
   }
 
-  private Set<String> getDefaultSubProjects() {
+  private Set<String> getDefaultSubProjects(Set<String> excludeProjects) {
     Set<String> projects = Sets.<String>newHashSet();
     if (defaultSubProjects == null || defaultSubProjects.isEmpty()) {
       projects = getMasterProject().getSubProjectNames();
@@ -67,6 +69,10 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
 
     for (String hidden : getHiddenSubProjects()) {
       projects.remove(hidden);
+    }
+
+    for (String exclude : excludeProjects) {
+      projects.remove(exclude);
     }
 
     return projects;
