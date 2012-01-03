@@ -1,0 +1,17 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+	xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
+
+  <f:optionalBlock 
+      name="rebuildRedsJobProperty" 
+      title="${%RebuildFailed Sub-Builds}"
+      checked="${instance!=null}">
+    <f:entry 
+        title="${%Maximum Retries}"
+        description="The Maximum Number of Times to Retry a Broken Sub-Build}">
+      <f:textbox
+          name="rebuildRedsJobProperty.maxRetries"
+          value="${instance.getMaxRetries()}" />
+    </f:entry>
+  </f:optionalBlock>
+</j:jelly>
