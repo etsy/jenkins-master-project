@@ -40,6 +40,8 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
   private Set<String> subProjects;
   private Set<String> hiddenSubProjects;
 
+  private int maxRetries;
+
   private transient List<Future<AbstractBuild>> futuresToAbort =
       Lists.<Future<AbstractBuild>>newArrayList();
 
@@ -48,6 +50,7 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
     this.masterResult = masterResultProvider.get();
     this.subProjects = project.getSubProjectNames();
     this.hiddenSubProjects = Sets.<String>newHashSet();
+    this.maxRetries = 0;
   }
 
   public MasterBuild(MasterProject project, File file) throws IOException {
@@ -68,6 +71,14 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
 
   /*package*/ void setHiddenSubProjects(Set<String> subProjects) {
     this.hiddenSubProjects = subProjects;
+  }
+
+  public int getMaxRetries() {
+    return this.maxRetries;
+  }
+
+  /*package*/ void setMaxRetries(int maxRetries) {
+    this.maxRetries = maxRetries;
   }
 
   private Set<AbstractProject> getProjectsByNames(Set<String> subProjects) {

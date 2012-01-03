@@ -18,6 +18,7 @@ import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import javax.servlet.ServletException;
 
 public class BuildWatcher implements Runnable {
 
@@ -63,6 +64,7 @@ public class BuildWatcher implements Runnable {
     Map<AbstractProject, AbstractBuild> projectBuildMap = 
         Maps.<AbstractProject, AbstractBuild>newHashMap();
     Set<AbstractProject> completed = Sets.<AbstractProject>newHashSet();
+    int maxRetries = masterBuild.getMaxRetries();
     do {
       for (AbstractProject project : projects) {
           AbstractBuild build = projectBuildMap.get(project);
@@ -74,18 +76,35 @@ public class BuildWatcher implements Runnable {
                       build.getUrl(),
                       "console");
               } else if (!completed.contains(project)) {
-                  completed.add(project);
-                  Result result = build.getResult();
-                  String page = "testReport";
-                  if (result.isWorseThan(Result.UNSTABLE)) {
-                      page = "console";
+                Result result = build.getResult();
+                String page = "testReport";
+                if (result.isWorseThan(Result.UNSTABLE)) {
+                    page = "console";
+                }
+                logger.printf("[%s] %s (%s%s%s)\n", 
+                    result, 
+                    project.getDisplayName(),
+                    hudson.getRootUrl(),
+                    build.getUrl(),
+                    page);
+                MasterBuildCause cause =
+                    (MasterBuildCause) build.getCause(MasterBuildCause.class);
+                if (result.isWorseThan(Result.SUCCESS)
+                    && cause.getRebuildNumber() < maxRetries) {
+                  try {
+                    this.masterBuild.rebuild(project);
+                  } catch (ServletException e) {
+                    throw new RuntimeException(e);
                   }
-                  logger.printf("[%s] %s (%s%s%s)\n", 
-                      result, 
+                  projectBuildMap.remove(project);
+                  logger.printf("!!!REBUILDING!!! %s (%s%s%s)",
                       project.getDisplayName(),
                       hudson.getRootUrl(),
                       build.getUrl(),
                       page);
+                } else {
+                  completed.add(project);
+                }
               }
           } else {
               build = buildFinder.findBuild(project, cause);

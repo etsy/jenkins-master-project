@@ -44,12 +44,17 @@ public class SubProjectsJobProperty extends JobProperty<MasterProject> {
 
   public boolean prebuild(AbstractBuild build, BuildListener listener) {
     SubProjectsAction action = build.getAction(SubProjectsAction.class);
+    Set<String> subProjectNames = action.getSubProjectNames();
     if (action != null) {
-      ((MasterBuild) build).setSubProjects(action.getSubProjectNames());
+       if (subProjectNames != null && !subProjectNames.isEmpty()) {
+        ((MasterBuild) build).setSubProjects(action.getSubProjectNames());
+      } else {
+        ((MasterBuild) build).setSubProjects(
+            getDefaultSubProjects(
+                action.getExcludeProjectNames()));
+      }
     } else {
-      ((MasterBuild) build).setSubProjects(
-          getDefaultSubProjects(
-              action.getExcludeProjectNames()));
+      ((MasterBuild) build).setSubProjects(getDefaultSubProjects(null));
     }
     ((MasterBuild) build).setHiddenSubProjects(getHiddenSubProjects());
     return true;
