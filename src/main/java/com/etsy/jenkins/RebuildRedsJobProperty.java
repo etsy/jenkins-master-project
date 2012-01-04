@@ -27,6 +27,8 @@ public class RebuildRedsJobProperty extends JobProperty<MasterProject> {
     RebuildRedsAction action = build.getAction(RebuildRedsAction.class);
     if (action != null) {
       ((MasterBuild) build).setMaxRetries(action.getMaxRetries());
+    } else {
+      ((MasterBuild) build).setMaxRetries(this.maxRetries);
     }
     return true;
   }
@@ -63,7 +65,7 @@ public class RebuildRedsJobProperty extends JobProperty<MasterProject> {
       if (property == null) {
         return null;
       }
-      int maxRetries = property.getInt("maxRetries");
+      int maxRetries = Integer.parseInt(property.getString("maxRetries"));
       return new RebuildRedsJobProperty(maxRetries);
     }
   }

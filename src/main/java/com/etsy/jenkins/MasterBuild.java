@@ -131,7 +131,10 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
     SubResult subResult = masterResult.getResult(project.getDisplayName());
     int rebuildNumber = subResult.getBuildNumbers().size();
     Cause cause = new MasterBuildCause(this, rebuildNumber);
+    rebuild(project, cause);
+  }
 
+  /*package*/ void rebuild(AbstractProject project, Cause cause) {
     rebuilder.rebuild(this, project, cause);
   }
 

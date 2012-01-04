@@ -63,6 +63,8 @@ public class BuildWatcher implements Runnable {
 
     Map<AbstractProject, AbstractBuild> projectBuildMap = 
         Maps.<AbstractProject, AbstractBuild>newHashMap();
+    Map<AbstractProject, Cause> causeMap =
+        Maps.<AbstractProject, Cause>newHashMap();
     Set<AbstractProject> completed = Sets.<AbstractProject>newHashSet();
     int maxRetries = masterBuild.getMaxRetries();
     do {
@@ -87,17 +89,17 @@ public class BuildWatcher implements Runnable {
                     hudson.getRootUrl(),
                     build.getUrl(),
                     page);
-                MasterBuildCause cause =
+                MasterBuildCause currentCause =
                     (MasterBuildCause) build.getCause(MasterBuildCause.class);
+                int rebuildNumber = currentCause.getRebuildNumber();
                 if (result.isWorseThan(Result.SUCCESS)
-                    && cause.getRebuildNumber() < maxRetries) {
-                  try {
-                    this.masterBuild.rebuild(project);
-                  } catch (ServletException e) {
-                    throw new RuntimeException(e);
-                  }
+                    && rebuildNumber < maxRetries) {
+                  Cause newCause =
+                      new MasterBuildCause(masterBuild, rebuildNumber + 1);
+                  this.masterBuild.rebuild(project, newCause);
                   projectBuildMap.remove(project);
-                  logger.printf("!!!REBUILDING!!! %s (%s%s%s)",
+                  causeMap.put(project, newCause);
+                  logger.printf("!!!REBUILDING!!! %s (%s%s%s)\n",
                       project.getDisplayName(),
                       hudson.getRootUrl(),
                       build.getUrl(),
@@ -107,6 +109,8 @@ public class BuildWatcher implements Runnable {
                 }
               }
           } else {
+              Cause cause = causeMap.containsKey(project)
+                  ? causeMap.get(project) : this.cause;
               build = buildFinder.findBuild(project, cause);
               if (build != null) {
                   masterBuild.addSubBuild(

@@ -4,7 +4,7 @@
 
   <f:optionalBlock 
       name="rebuildRedsJobProperty" 
-      title="${%RebuildFailed Sub-Builds}"
+      title="${%Rebuild Failed Sub-Builds}"
       checked="${instance!=null}">
     <f:entry 
         title="${%Maximum Retries}"
