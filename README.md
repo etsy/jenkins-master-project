@@ -1,7 +1,7 @@
 Jenkins Plugin: Master Project
 ==============================
 
-This is a plugin for [Jenkins][http://jenkins-ci.org] Continuous Integration Server.  This plugin provides a new project type.  In this new project type you can select a list of sub-projects which should be executed in one logical master project.
+This is a plugin for [Jenkins](http://jenkins-ci.org) Continuous Integration Server.  This plugin provides a new project type.  In this new project type you can select a list of sub-projects which should be executed in one logical master project.
 
 Installation
 ---------------------------
