@@ -14,12 +14,12 @@
 
   <repositories>
     <repository>
-      <id>m.g.o-public</id>
-      <url>http://maven.glassfish.org/content/groups/public/</url>
+      <id>jenkins-public</id>
+      <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
 
-  <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
+  <!-- get every artifact through the public Jenkins plugin repository -->
   <dependencies>
     <dependency>
       <groupId>org.jvnet.hudson.plugins</groupId>
