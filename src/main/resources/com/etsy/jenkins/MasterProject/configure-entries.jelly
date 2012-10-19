@@ -42,10 +42,17 @@
     </f:block>
   </f:section>
 
-  <f:descriptorList 
-      title="${%Post-build Actions}"
-      descriptors="${it.getPotentialPublisherDescriptors()}"
-      instances="${it.getPublishers()}" />
+  <f:section title="${%Post-build Actions}">
+    <f:block>
+      <f:hetero-list name="publisher" hasHeader="true"
+                     descriptors="${h.getPublisherDescriptors(it)}"
+                     items="${it.publishersList}"
+                     oneEach="true"
+                     menuAlign="bl-tl"
+                     honorOrder="true"
+                     addCaption="${%Add post-build action}"/>
+    </f:block>
+  </f:section>
 
 </j:jelly>
 
