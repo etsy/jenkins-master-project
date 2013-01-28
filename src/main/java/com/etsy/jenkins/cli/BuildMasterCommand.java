@@ -161,6 +161,15 @@ public class BuildMasterCommand extends CLICommand {
          values.add(pd.createValue(this, e.getValue()));
        }
 
+       // handle missing parameters by adding as default values ISSUE JENKINS-7162
+       for (ParameterDefinition pd :  pdp.getParameterDefinitions()) {
+         if (parameters.containsKey(pd.getName()))
+           continue;
+
+         // not passed in use default
+         values.add(pd.getDefaultParameterValue());
+       }
+
        a = new ParametersAction(values);
      }
 
