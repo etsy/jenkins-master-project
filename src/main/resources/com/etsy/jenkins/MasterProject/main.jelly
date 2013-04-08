@@ -1,5 +1,9 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
-
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" 
+	xmlns:d="jelly:define" xmlns:l="/lib/layout" 
+	xmlns:t="/lib/hudson" xmlns:f="/lib/form" 
+	xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
+	
+  <st:include page="makeDisabled.jelly" />
   <j:set var="items" value="${it.getSubProjects()}" />
   <j:if test="${!empty(items)}">
     <h2>${%Sub-Projects}</h2>
