@@ -2,24 +2,22 @@ package com.etsy.jenkins;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.ParametersAction;
-import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
+import hudson.tasks.Builder;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import com.google.inject.Inject;
 
 /*package*/ class MasterBuilder extends Builder {
 
@@ -42,8 +40,8 @@ import java.util.concurrent.Future;
       AbstractBuild build, Launcher launcher, BuildListener listener)
       throws InterruptedException, IOException {
     MasterBuild masterBuild = (MasterBuild) build;
-    Set<AbstractProject> subProjects = masterBuild.getSubProjects();
-    Set<AbstractProject> hiddenSubProjects = masterBuild.getHiddenSubProjects();
+    Set<AbstractProject> subProjects =  filterDisabledJobs(masterBuild.getSubProjects(), listener);
+    Set<AbstractProject> hiddenSubProjects = filterDisabledJobs(masterBuild.getHiddenSubProjects(), listener);
 
     Cause cause = new MasterBuildCause(masterBuild);
 
@@ -53,7 +51,21 @@ import java.util.concurrent.Future;
 
     waitForBuilds(masterBuild, subProjects, cause, listener);
 
-    return false; // This should be the only builder
+    return true; // This should be the only builder
+  }
+  
+  @SuppressWarnings("rawtypes")
+  private Set<AbstractProject> filterDisabledJobs(Set<AbstractProject> projects, 
+		  BuildListener listener) {
+	Set<AbstractProject> subs = projects;
+	for(Iterator<AbstractProject> i = subs.iterator(); i.hasNext();) {
+      AbstractProject p = i.next();
+		if(p.isDisabled()) {
+		  listener.getLogger().printf("%s is disabled.\n",p.getDisplayName());
+		  i.remove();
+		}
+	}
+	return subs;
   }
 
   /*package*/ void scheduleBuilds(

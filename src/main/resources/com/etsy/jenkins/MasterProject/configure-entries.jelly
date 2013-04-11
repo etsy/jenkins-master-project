@@ -25,6 +25,10 @@
       <st:include page="configure-advanced.jelly" optional="true" />
     </f:advanced>
   </f:section>
+  
+  <p:config-trigger>
+      <p:config-upstream-pseudo-trigger />
+  </p:config-trigger>
 
   <p:config-buildWrappers />
 
