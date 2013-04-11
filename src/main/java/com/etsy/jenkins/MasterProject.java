@@ -221,7 +221,6 @@ implements TopLevelItem {
     super.submit(req, res);
   }
 
-  @Override
   public TopLevelItemDescriptor getDescriptor() {
     return DESCRIPTOR;
   }

@@ -198,7 +198,6 @@ public class MasterMailer extends Notifier {
     return writer.toString();
   }
 
-  @Override
   public BuildStepMonitor getRequiredMonitorService() {
     return BuildStepMonitor.NONE;
   }
