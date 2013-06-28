@@ -34,7 +34,7 @@
         <j:if test="${!job.equals(it)}">
           <f:checkbox 
               name="${job.name}" 
-              checked="${it.contains(job)}" 
+              checked="${it.jobNamesContains(job)}" 
               title="${job.name}" />
           <br />
         </j:if>

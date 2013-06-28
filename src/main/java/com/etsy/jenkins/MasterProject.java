@@ -86,6 +86,10 @@ implements TopLevelItem {
   }
 
   public boolean contains(TopLevelItem item) {
+    return getSubProjectNames().contains(item.getName());
+  }
+  
+  public boolean jobNamesContains(TopLevelItem item) {
     return jobNames.contains(item.getName());
   }
 
@@ -225,12 +229,12 @@ implements TopLevelItem {
     
     // Include Regex project names
     if (req.getParameter("useincluderegex") != null) {
-    	System.out.println("outputting the useincluderegex: " + req.getParameter("useincluderegex"));
         includeRegex = Util.nullify(req.getParameter("includeRegex"));
         if (includeRegex == null)
             includePattern = null;
-        else
+        else {
             includePattern = Pattern.compile(includeRegex);
+        }
     } else {
         includeRegex = null;
         includePattern = null;
@@ -261,24 +265,29 @@ implements TopLevelItem {
 
   public Set<AbstractProject> getSubProjects() {
 	  
-	if (includePattern != null) {
-	  for (Item item : Hudson.getInstance().getItems()) {
-	    String itemName = item.getName();
-	    if (includePattern.matcher(itemName).matches()) {
-	      jobNames.add(itemName);
-	    }
-	  }
-	}
-	  
     Set<AbstractProject> subProjects = Sets.<AbstractProject>newLinkedHashSet();
     for (String jobName : jobNames) {
       subProjects.add(projectFinder.findProject(jobName));
     }
+
+    // Includes projects that match regex
+	if (includePattern != null) {
+	  for (Item item : Hudson.getInstance().getItems()) {
+	    String itemName = item.getName();
+	    if (includePattern.matcher(itemName).matches()) {
+	      subProjects.add(projectFinder.findProject(itemName));
+	    }
+	  }
+	}
     return subProjects;
   }
 
   public Set<String> getSubProjectNames() {
-    return jobNames;
+	Set<String> names = Sets.<String>newHashSet();
+	for (AbstractProject subProject : getSubProjects()) {
+		names.add(subProject.getName());
+	}
+    return names;
   }
 
   @Extension
