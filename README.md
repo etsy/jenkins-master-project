@@ -14,6 +14,11 @@ Install Maven 2.2.1 or higher
 
 The last part is to place the `hpi` file into the plugins directory.  You can also do this through the Jenkins interface if you do not have `ssh` access to the Jenkins server.
 
+Adding Jobs via Regular Expression
+---------------------------
+
+You can add a job via regular expression.  This works just like the Jenkins List View's regular expression.
+
 Contribute
 ---------------------------
 
