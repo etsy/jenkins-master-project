@@ -17,7 +17,7 @@
   </description>
   <scm>
     <connection>scm:git:ssh://github.com/etsy/jenkins-master-project.git</connection>
-    <developerConnection>scm:git:git@github.com/etsy/jenkins-master-project.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:etsy/jenkins-master-project.git</developerConnection>
     <url>https://github.com/etsy/jenkins-master-project.git</url>
 </scm>
 <!--<url>https://wiki.jenkins-ci.org/display/JENKINS/</url>-->
