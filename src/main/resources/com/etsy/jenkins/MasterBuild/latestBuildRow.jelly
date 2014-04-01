@@ -20,6 +20,9 @@
   <td>
     <t:buildStatusSummary build="${b}" />
   </td>
+  <td>
+    ${b.durationString}
+  </td>
   <td width="30px"> <!-- Build Artifacts -->
     <j:choose>
       <j:when test="${b.getHasArtifacts()}">

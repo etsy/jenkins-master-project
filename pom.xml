@@ -3,8 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.427</version><!-- which version of Hudson is this plugin built against? -->
-    <relativePath>../pom.xml</relativePath>
+    <version>1.515</version><!-- which version of Hudson is this plugin built against? -->
   </parent>
 
   <groupId>com.etsy.jenkins</groupId>
@@ -12,14 +11,34 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
+  <name>Jenkins Master Project Plugin</name>
+   <description>
+        This plugin provides a new project type. In this new project type you can select a list of sub-projects which should be executed in one logical master project.
+  </description>
+  <scm>
+    <connection>scm:git:ssh://github.com/etsy/jenkins-master-project.git</connection>
+    <developerConnection>scm:git:git@github.com/etsy/jenkins-master-project.git</developerConnection>
+    <url>https://github.com/etsy/jenkins-master-project.git</url>
+</scm>
+<!--<url>https://wiki.jenkins-ci.org/display/JENKINS/</url>-->
+  <developers>
+    <developer>
+      <id>jgedarovich</id>
+      <name>Jimbo</name>
+    </developer>
+  </developers>
   <repositories>
     <repository>
       <id>jenkins-public</id>
       <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
-
-  <!-- get every artifact through the public Jenkins plugin repository -->
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>http://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>org.jvnet.hudson.plugins</groupId>
@@ -40,14 +59,20 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-      <version>2.0</version>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>mailer</artifactId>
+      <version>1.8</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-assisted-inject</artifactId>
-      <version>2.0</version>
+      <groupId>org.sonatype.sisu</groupId>
+      <artifactId>sisu-guice</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.sonatype.sisu.inject</groupId>
+        <artifactId>guice-assistedinject</artifactId>
+        <version>3.1.0</version>
     </dependency>
   </dependencies>
 </project>

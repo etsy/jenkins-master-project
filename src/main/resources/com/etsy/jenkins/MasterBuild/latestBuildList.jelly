@@ -46,6 +46,7 @@
       <th>${%Build}</th>
       <th initialSortDir="up">${%Date}</th>
       <th>${%Status}</th>
+      <th>${%Duration}</th>
       <th><st:nbsp/></th> <!-- Artifacts -->
       <th><st:nbsp/></th> <!-- Changes -->
       <th><st:nbsp/></th> <!-- Test Report -->

@@ -28,8 +28,8 @@ import java.util.concurrent.ExecutorService;
             FactoryProvider.newFactory(
                 RebuildWatcher.Factory.class, RebuildWatcher.class));
     bindConstant().annotatedWith(MasterProject.PingTime.class).to(7000L);
-
-    ExecutorService executor = Executors.newFixedThreadPool(25);
+    //Thread pool size; should be >= number of build slaves
+    ExecutorService executor = Executors.newFixedThreadPool(150);
     bind(ExecutorService.class)
         .toInstance(executor);
     bind(Executor.class)
