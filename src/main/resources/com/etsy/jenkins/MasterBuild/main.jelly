@@ -8,7 +8,7 @@
             onSuccess: function(res) {
                 var div = document.getElementById("latestBuilds");
                 div.innerHTML = res.responseText;
-                Behavior.applySubTree(div);
+                Behaviour.applySubtree(div);
             }
         });
     }
