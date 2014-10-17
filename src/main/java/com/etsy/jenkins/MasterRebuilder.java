@@ -6,6 +6,7 @@ import hudson.model.ParametersAction;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import hudson.model.queue.QueueTaskFuture;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -31,12 +32,13 @@ import java.util.concurrent.Executor;
       MasterBuild masterBuild, AbstractProject project, Cause cause) {
     List<ParametersAction> parametersActionList =
         masterBuild.getActions(ParametersAction.class);
-    ParametersAction[] parameterActions = 
+    ParametersAction[] parameterActions =
         parametersActionPropagator
             .getPropagatedActions(masterBuild, project);
-    project.scheduleBuild(0, cause, parameterActions);
+    QueueTaskFuture<?> buildFuture =
+        project.scheduleBuild2(0, cause, parameterActions);
     executor.execute(
-        rebuildWatcherFactory.create(masterBuild, project, cause)); 
+        rebuildWatcherFactory.create(masterBuild, project, cause, buildFuture));
   }
 }
 

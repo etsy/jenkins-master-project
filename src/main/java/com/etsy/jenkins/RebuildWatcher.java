@@ -8,14 +8,27 @@ import hudson.model.Cause;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import hudson.model.Job;
+import hudson.model.PermalinkProjectAction.Permalink;
+import hudson.model.Run;
+import hudson.model.queue.QueueTaskFuture;
+import java.util.concurrent.ExecutionException;
+import jenkins.model.PeepholePermalink;
 
+/**
+ * A Runnable that watches a rebuilt sub-job from start to finish.
+ *
+ * It updates the parent (MasterBuild) job's state appropriately at the start
+ * and end of sub-job execution.
+ */
 public class RebuildWatcher implements Runnable {
 
   public static interface Factory {
     RebuildWatcher create(
         MasterBuild masterBuild,
         AbstractProject project,
-        Cause cause);
+        Cause cause,
+        QueueTaskFuture<?> buildFuture);
   }
 
   private final BuildFinder buildFinder;
@@ -24,17 +37,20 @@ public class RebuildWatcher implements Runnable {
   private final MasterBuild masterBuild;
   private final AbstractProject project;
   private final Cause cause;
+  private final QueueTaskFuture<?> buildFuture;
 
   @Inject
   public RebuildWatcher(
        @Assisted MasterBuild masterBuild,
        @Assisted AbstractProject project,
        @Assisted Cause cause,
+       @Assisted QueueTaskFuture<?> buildFuture,
        BuildFinder buildFinder,
        @MasterProject.PingTime long pingTime) {
     this.masterBuild = masterBuild;
     this.project = project;
     this.cause = cause;
+    this.buildFuture = buildFuture;
 
     this.buildFinder = buildFinder;
     this.pingTime = pingTime;
