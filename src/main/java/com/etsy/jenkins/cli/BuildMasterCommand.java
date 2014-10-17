@@ -59,8 +59,8 @@ public class BuildMasterCommand extends CLICommand {
 
   @Argument(
       handler=MasterProjectOptionHandler.class,
-      metaVar="MASTER_JOB", 
-      usage="Name of the job to build", 
+      metaVar="MASTER_JOB",
+      usage="Name of the job to build",
       required=true)
   public MasterProject job;
 
@@ -129,13 +129,13 @@ public class BuildMasterCommand extends CLICommand {
     } else if (spjp != null) {
       stdout.println(
           String.format(
-              "Executing DEFAULT sub-jobs: %s", 
+              "Executing DEFAULT sub-jobs: %s",
               spjp.getDefaultSubProjectsString()));
     }
 
     ParametersAction a = null;
     if (!parameters.isEmpty()) {
-      ParametersDefinitionProperty pdp = 
+      ParametersDefinitionProperty pdp =
           job.getProperty(ParametersDefinitionProperty.class);
       if (pdp == null) {
         throw new AbortException(
@@ -174,9 +174,9 @@ public class BuildMasterCommand extends CLICommand {
      }
 
      String user = Hudson.getAuthentication().getName();
-     
+
      CLICause cause = new CLICause(user, a, sp);
-     Future<? extends AbstractBuild> f = 
+     Future<? extends AbstractBuild> f =
          job.scheduleBuild2(0, cause, a, sp);
 
      AbstractBuild build = null;
@@ -188,11 +188,10 @@ public class BuildMasterCommand extends CLICommand {
      } while(build == null);
 
      stdout.println(
-         String.format("......... %s ( %s%s%s )", 
+         String.format("......... %s ( %s%s )",
           job.getDisplayName(),
           hudson.getRootUrl(),
-          build.getUrl(),
-          "console"));
+          build.getUrl()));
      build.setDescription("<h2>" + cause.getUserName() + "</h2>");
 
      if (!sync) return 0;
@@ -261,7 +260,7 @@ public class BuildMasterCommand extends CLICommand {
     public void print(TaskListener listener) {
         listener.getLogger().println(String.format(
           "Started by command line for %s\n",
-           HyperlinkNote.encodeTo(getUserUrl(), getUserName()))); 
+           HyperlinkNote.encodeTo(getUserUrl(), getUserName())));
     }
 
     @Override
