@@ -48,12 +48,71 @@ public class RebuildWatcher implements Runnable {
     } while(build == null);
 
     masterBuild.addSubBuild(project.getDisplayName(), build.getNumber());
+
+    try {
+      this.buildFuture.get();
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
+    } catch (ExecutionException ex) {
+      throw new RuntimeException(ex);
+    }
+
+    // Update the "last stable build" and "last successful build" permalinks.
+    new UpdateableProxyPermalink(
+        (PeepholePermalink) Permalink.LAST_STABLE_BUILD)
+            .update(masterBuild.getProject(), masterBuild);
+    new UpdateableProxyPermalink(
+        (PeepholePermalink) Permalink.LAST_SUCCESSFUL_BUILD)
+            .update(masterBuild.getProject(), masterBuild);
   }
 
   private void rest() {
     try {
       Thread.sleep(pingTime);
     } catch (InterruptedException ignore) {}
+  }
+
+  /**
+   * A PeepholePermalink that delegates to a given PeepholePeermalink and
+   * exposes the @{code updateCache} method.
+   *
+   * These are used to update existing Permalinks, since the
+   * @{code updateCache} method is protected in the Jenkins API. For example,
+   * if a retried sub-job causes a master build to update from red to green,
+   * we need to update the "last stable build" link. We use an instance of this
+   * class to do so.
+   *
+   * Updating a build's result is a violation of the Jenkins API. A job's
+   * result isn't supposed to change once it's finished running and been set
+   * once. We accept that this hack makes us scofflaws.
+   */
+  private static final class UpdateableProxyPermalink
+    extends PeepholePermalink {
+
+    private final PeepholePermalink delegate;
+
+    private UpdateableProxyPermalink(PeepholePermalink delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public boolean apply(Run<?, ?> run) {
+      return delegate.apply(run);
+    }
+
+    @Override
+    public String getDisplayName() {
+      return delegate.getDisplayName();
+    }
+
+    @Override
+    public String getId() {
+      return delegate.getId();
+    }
+
+    private void update(Job<?, ?> job, Run<?, ?> run) {
+      super.updateCache(job, run);
+    }
   }
 }
 

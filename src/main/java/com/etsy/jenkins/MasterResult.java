@@ -66,5 +66,18 @@ import java.util.Set;
     }
     return endResult;
   }
+
+  public boolean isBuilding() {
+    if (results.isEmpty()) {
+      // No builds have been scheduled yet.
+      return true;
+    }
+    for (SubResult subResult : results.values()) {
+      if (subResult.getLatestBuild().isBuilding()) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
