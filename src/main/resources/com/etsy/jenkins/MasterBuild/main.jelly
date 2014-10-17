@@ -13,12 +13,15 @@
         });
     }
   </script>
+  <div>
+  <p><b>If a sub-job fails, click the <u>Rebuild</u> link to retry it. You may have to reload this page to see the retry in effect.</b></p>
+  </div>
   <div id="latestBuilds">
     <st:include page="latestBuildList.jelly" />
   </div>
   <script defer="true">
     window.setInterval(refreshLatestBuilds, 7000);
   </script>
- 
+
 </j:jelly>
 
