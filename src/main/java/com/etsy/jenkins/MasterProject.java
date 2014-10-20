@@ -58,8 +58,8 @@ public class MasterProject
 extends Project<MasterProject, MasterBuild>
 implements TopLevelItem {
 
-  @BindingAnnotation 
-  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) 
+  @BindingAnnotation
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
   @Retention(RetentionPolicy.RUNTIME)
   public @interface PingTime {}
 
@@ -71,7 +71,7 @@ implements TopLevelItem {
 
   @DataBoundConstructor
   public MasterProject(
-      ItemGroup parent, 
+      ItemGroup parent,
       String name) {
     super(parent, name);
     this.jobNames = Sets.<String>newHashSet();
@@ -97,7 +97,7 @@ implements TopLevelItem {
   }
 
   public List<Descriptor<Publisher>> getPotentialPublisherDescriptors() {
-    List<Descriptor<Publisher>> publishers = 
+    List<Descriptor<Publisher>> publishers =
         Lists.<Descriptor<Publisher>>newArrayList(MasterMailer.DESCRIPTOR);
     if (hudson.getPlugin("ircbot") != null) {
       publishers.add(IrcPublisher.DESCRIPTOR);
@@ -117,14 +117,13 @@ implements TopLevelItem {
     return MasterBuild.class;
   }
 
-  public void doRebuild(StaplerRequest req, StaplerResponse res) 
+  public void doRebuild(StaplerRequest req, StaplerResponse res)
       throws IOException, ServletException {
     checkPermission(Permission.READ);
 
     AbstractProject subProject = this.getSubProject(req);
     MasterBuild masterBuild = this.getMasterBuild(req);
     masterBuild.rebuild(subProject);
-    res.forward(masterBuild, masterBuild.getUrl(), req);
   }
 
   private AbstractProject getSubProject(StaplerRequest req)
@@ -174,7 +173,7 @@ implements TopLevelItem {
         if (item == null) {
           return FormValidation.error(
               Messages.BuildTrigger_NoSuchProject(
-                  projectName, 
+                  projectName,
                   AbstractProject.findNearest(projectName).getName()));
         }
         if (!(item instanceof AbstractProject)) {
@@ -207,9 +206,9 @@ implements TopLevelItem {
   }
 
   @Override
-  protected void submit(StaplerRequest req, StaplerResponse res) 
+  protected void submit(StaplerRequest req, StaplerResponse res)
       throws IOException, ServletException, Descriptor.FormException {
-  
+
     // Handle the job list
     jobNames.clear();
     for (TopLevelItem item : Hudson.getInstance().getItems()) {
@@ -244,7 +243,7 @@ implements TopLevelItem {
   }
 
   @Extension
-  public static final TopLevelItemDescriptor DESCRIPTOR = 
+  public static final TopLevelItemDescriptor DESCRIPTOR =
       new TopLevelItemDescriptor() {
 
     private Injector injector = Guice.createInjector(new MasterModule());
