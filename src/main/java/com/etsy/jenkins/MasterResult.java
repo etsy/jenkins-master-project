@@ -73,7 +73,8 @@ import java.util.Set;
       return true;
     }
     for (SubResult subResult : results.values()) {
-      if (subResult.getLatestBuild().isBuilding()) {
+      AbstractBuild latestSubBuild = subResult.getLatestBuild();
+      if (latestSubBuild != null && latestSubBuild.isBuilding()) {
         return true;
       }
     }
