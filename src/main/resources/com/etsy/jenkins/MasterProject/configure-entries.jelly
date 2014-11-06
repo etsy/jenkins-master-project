@@ -34,12 +34,18 @@
         <j:if test="${!job.equals(it)}">
           <f:checkbox 
               name="${job.name}" 
-              checked="${it.contains(job)}" 
+              checked="${it.jobNamesContains(job)}" 
               title="${job.name}" />
           <br />
         </j:if>
       </j:forEach>
     </f:block>
+    <f:optionalBlock name="useincluderegex" title="${%Use a regular expression to include jobs into the view}"
+                   checked="${it.includeRegex != null}" help="/help/view-config/includeregex.html">
+        <f:entry title="${%Regular expression}">
+          <f:textbox name="includeRegex" field="includeRegex" />
+        </f:entry>
+      </f:optionalBlock>
   </f:section>
 
   <f:section title="${%Post-build Actions}">

@@ -4,6 +4,7 @@ import com.etsy.jenkins.finder.ProjectFinder;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.BuildListener;
@@ -52,6 +53,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import javax.servlet.ServletException;
 
 public class MasterProject
@@ -64,6 +68,10 @@ implements TopLevelItem {
   public @interface PingTime {}
 
   /*package*/ final Set<String> jobNames;
+
+  private String includeRegex;
+
+  private transient Pattern includePattern;
 
   @Inject static Hudson hudson;
   @Inject static ProjectFinder projectFinder;
@@ -78,14 +86,20 @@ implements TopLevelItem {
   }
 
   public boolean contains(TopLevelItem item) {
+    return getSubProjectNames().contains(item.getName());
+  }
+  
+  public boolean jobNamesContains(TopLevelItem item) {
     return jobNames.contains(item.getName());
   }
 
-  /*package*/ void onDeleted(Item item) {
+  /*package*/ 
+  void onDeleted(Item item) {
     jobNames.remove(item.getName());
   }
 
-  /*package*/ void onRenamed(Item item, String oldName, String newName) {
+  /*package*/ 
+  void onRenamed(Item item, String oldName, String newName) {
     if ((newName != null) && jobNames.remove(oldName)) {
       jobNames.add(newName);
     }
@@ -211,6 +225,20 @@ implements TopLevelItem {
 
     // Handle the job list
     jobNames.clear();
+    
+    // Include Regex project names
+    if (req.getParameter("useincluderegex") != null) {
+        includeRegex = Util.nullify(req.getParameter("includeRegex"));
+        if (includeRegex == null)
+            includePattern = null;
+        else {
+            includePattern = Pattern.compile(includeRegex);
+        }
+    } else {
+        includeRegex = null;
+        includePattern = null;
+    }
+    
     for (TopLevelItem item : Hudson.getInstance().getItems()) {
       if (req.getParameter(item.getName()) != null) {
         jobNames.add(item.getName());
@@ -229,17 +257,36 @@ implements TopLevelItem {
   public Hudson getParent() {
     return (Hudson) super.getParent();
   }
+  
+  public String getIncludeRegex() {
+      return includeRegex;
+  }
 
   public Set<AbstractProject> getSubProjects() {
+	  
     Set<AbstractProject> subProjects = Sets.<AbstractProject>newLinkedHashSet();
     for (String jobName : jobNames) {
       subProjects.add(projectFinder.findProject(jobName));
     }
+
+    // Includes projects that match regex
+	if (includePattern != null) {
+	  for (Item item : Hudson.getInstance().getItems()) {
+	    String itemName = item.getName();
+	    if (includePattern.matcher(itemName).matches()) {
+	      subProjects.add(projectFinder.findProject(itemName));
+	    }
+	  }
+	}
     return subProjects;
   }
 
   public Set<String> getSubProjectNames() {
-    return jobNames;
+	Set<String> names = Sets.<String>newHashSet();
+	for (AbstractProject subProject : getSubProjects()) {
+		names.add(subProject.getName());
+	}
+    return names;
   }
 
   @Extension
@@ -252,6 +299,18 @@ implements TopLevelItem {
     public String getDisplayName() {
       return "Master Project";
     }
+    
+//    public FormValidation doCheckIncludeRegex( @QueryParameter String value ) throws IOException, ServletException, InterruptedException  {
+//        String v = Util.fixEmpty(value);
+//        if (v != null) {
+//            try {
+//                Pattern.compile(v);
+//            } catch (PatternSyntaxException pse) {
+//                return FormValidation.error(pse.getMessage());
+//            }
+//        }
+//        return FormValidation.ok();
+//    }
 
     public MasterProject newInstance(ItemGroup group, String name) {
       return new MasterProject(group, name);
@@ -280,4 +339,3 @@ implements TopLevelItem {
     }
   };
 }
-
