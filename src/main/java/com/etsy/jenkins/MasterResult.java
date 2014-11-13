@@ -68,10 +68,6 @@ import java.util.Set;
   }
 
   public boolean isBuilding() {
-    if (results.isEmpty()) {
-      // No builds have been scheduled yet.
-      return true;
-    }
     for (SubResult subResult : results.values()) {
       AbstractBuild latestSubBuild = subResult.getLatestBuild();
       if (latestSubBuild != null && latestSubBuild.isBuilding()) {
