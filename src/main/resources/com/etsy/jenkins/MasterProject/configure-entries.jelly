@@ -16,6 +16,12 @@
     </f:optionalBlock>
   </j:if>
 
+  <p:config-scm/>
+
+  <p:config-trigger>
+    <p:config-upstream-pseudo-trigger />
+  </p:config-trigger>
+
   <f:section title="${%Advanced Project Options configure-common}">
     <f:advanced>
       <p:config-quietPeriod />
