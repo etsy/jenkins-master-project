@@ -9,8 +9,8 @@ Installation
 Install Maven 2.2.1 or higher
 
     cd ~/jenkins-master-project
-    mvn package && mvn install
-    scp target/master-plugin.hpi user@jenkins.server:/opt/jenkins/.jenkins/plugins/.
+    mvn package
+    scp target/MasterProject.hpi user@jenkins.server:/opt/jenkins/.jenkins/plugins/.
 
 The last part is to place the `hpi` file into the plugins directory.  You can also do this through the Jenkins interface if you do not have `ssh` access to the Jenkins server.
 
