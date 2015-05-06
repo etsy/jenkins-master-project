@@ -2,9 +2,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project" xmlns:i="jelly:fmt">
 
   <p:config-disableBuild/>
-  <j:if test="${app.CONCURRENT_BUILD}">
-    <f:optionalBlock field="concurrentBuild" title="${%title.concurrentbuilds}" />
-  </j:if>
+  <p:config-concurrentBuild/>
 
   <!-- master/slave -->
   <j:if test="${app.labels.size() gt 1 || app.clouds.size() gt 0 || (it.assignedLabel!=null and it.assignedLabel!=app.selfLabel)}">
@@ -32,9 +30,9 @@
     <f:block>
       <j:forEach var="job" items="${app.items}">
         <j:if test="${!job.equals(it)}">
-          <f:checkbox 
-              name="${job.name}" 
-              checked="${it.contains(job)}" 
+          <f:checkbox
+              name="${job.name}"
+              checked="${it.contains(job)}"
               title="${job.name}" />
           <br />
         </j:if>
