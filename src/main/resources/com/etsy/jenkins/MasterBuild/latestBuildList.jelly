@@ -14,7 +14,20 @@
               {
                   subProject: projectName,
                   number: "${it.getNumber()}"
+              },
+
+              onSuccess: function(response) {
+                if (response.responseText.include("Authentication required")) {
+                    alert("You must be logged in to initiate a rebuild; please log in and try again");
+                    window.location.href='/login?from='+encodeURIComponent(window.location.pathname);
+                }
+              },
+
+              onFailure: function(response) {
+                alert("You must be logged in to initiate a rebuild; please log in and try again");
+                window.location.href='/login?from='+encodeURIComponent(window.location.pathname);
               }
+
           }
       );
 
