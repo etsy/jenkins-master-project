@@ -119,7 +119,7 @@ implements TopLevelItem {
 
   public void doRebuild(StaplerRequest req, StaplerResponse res)
       throws IOException, ServletException {
-    checkPermission(Permission.READ);
+    checkPermission(Item.BUILD);
 
     AbstractProject subProject = this.getSubProject(req);
     MasterBuild masterBuild = this.getMasterBuild(req);

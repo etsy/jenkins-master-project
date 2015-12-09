@@ -1,7 +1,7 @@
 package com.etsy.jenkins;
 
 import com.etsy.jenkins.finder.ProjectFinder;
-
+import jenkins.model.Jenkins;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Build;
@@ -144,7 +144,7 @@ public class MasterBuild extends Build<MasterProject, MasterBuild> {
 
   public void doRefreshLatestBuilds(StaplerRequest req, StaplerResponse res)
       throws IOException, ServletException {
-    checkPermission(Permission.READ);
+    checkPermission(Jenkins.READ);
 
     req.getView(this, "latestBuildList.jelly").forward(req, res);
   }
