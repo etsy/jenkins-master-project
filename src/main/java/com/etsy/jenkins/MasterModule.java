@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
         .toInstance(executor);
 
     requestStaticInjection(MasterBuild.class);
+    requestStaticInjection(RebuildWatcher.class);
     requestStaticInjection(MasterProject.class);
     requestStaticInjection(MasterResult.class);
     requestStaticInjection(SubResult.class);
@@ -43,6 +44,7 @@ import java.util.concurrent.ExecutorService;
     requestStaticInjection(SubProjectsJobProperty.class);
     requestStaticInjection(BuildMasterCommand.class);
     requestStaticInjection(MasterProjectOptionHandler.class);
+    requestStaticInjection(RebuildNotifierProperty.class);
   }
 }
 
