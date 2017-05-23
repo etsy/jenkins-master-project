@@ -27,7 +27,11 @@ public class BuildFinder {
 
   public AbstractBuild findBuild(AbstractProject project, int buildNumber) {
     if (project == null) return null;
-    return (AbstractBuild) project.getBuildByNumber(buildNumber);
+    try {
+      return (AbstractBuild) project.getBuildByNumber(buildNumber);
+    } catch (java.lang.NullPointerException e) {
+      return null;
+    }
   }
 
   public AbstractBuild findBuild(String projectName, Cause cause) {

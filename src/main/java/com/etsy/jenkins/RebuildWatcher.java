@@ -5,6 +5,8 @@ import com.etsy.jenkins.finder.BuildFinder;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
+import hudson.model.Hudson;
+import hudson.model.Result;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -14,6 +16,15 @@ import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
 import java.util.concurrent.ExecutionException;
 import jenkins.model.PeepholePermalink;
+import org.apache.commons.io.output.NullOutputStream;
+
+import hudson.model.StreamBuildListener;
+import java.util.Map;
+import hudson.model.Descriptor;
+import hudson.tasks.Publisher;
+import jenkins.plugins.slack.SlackNotifier;
+import jenkins.plugins.slack.ActiveNotifier;
+import jenkins.plugins.slack.SlackService;
 
 /**
  * A Runnable that watches a rebuilt sub-job from start to finish.
@@ -38,6 +49,7 @@ public class RebuildWatcher implements Runnable {
   private final AbstractProject project;
   private final Cause cause;
   private final QueueTaskFuture<?> buildFuture;
+  @Inject static Hudson hudson;
 
   @Inject
   public RebuildWatcher(
@@ -73,6 +85,9 @@ public class RebuildWatcher implements Runnable {
       throw new RuntimeException(ex);
     }
 
+    // Invoke SlackNotifier when rebuilds result in a successful build
+    this.rebuildNotify();
+
     // Update the "last stable build" and "last successful build" permalinks.
     new UpdateableProxyPermalink(
         (PeepholePermalink) Permalink.LAST_STABLE_BUILD)
@@ -80,6 +95,25 @@ public class RebuildWatcher implements Runnable {
     new UpdateableProxyPermalink(
         (PeepholePermalink) Permalink.LAST_SUCCESSFUL_BUILD)
             .update(masterBuild.getProject(), masterBuild);
+  }
+
+  private void rebuildNotify() {
+    if (masterBuild.getNotifyOnRebuild() && hudson.getPlugin("slack") != null && hudson.getPlugin("slack").getWrapper().isActive()) {
+      if (masterBuild.getResult() == Result.SUCCESS) {
+
+        SlackNotifier notifier = null;
+        Map<Descriptor<Publisher>, Publisher> map = masterBuild.getProject().getPublishersList().toMap();
+        for (Publisher publisher : map.values()) {
+          if (publisher instanceof SlackNotifier) {
+            notifier = (SlackNotifier) publisher;
+          }
+        }
+
+        ActiveNotifier.MessageBuilder messageBuilder = new ActiveNotifier.MessageBuilder(notifier, masterBuild);
+        String message = messageBuilder.append(" Rebuild was successful").appendOpenLink().toString();
+        notifier.newSlackService(masterBuild, new StreamBuildListener(new NullOutputStream())).publish(message, "good");
+      }
+    }
   }
 
   private void rest() {

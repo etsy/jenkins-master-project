@@ -3,7 +3,9 @@ package com.etsy.jenkins;
 import com.etsy.jenkins.finder.BuildFinder;
 
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Result;
+import hudson.model.Hudson;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -20,15 +22,21 @@ import java.util.TreeSet;
   @Inject static BuildFinder buildFinder;
 
   /*package*/ final String projectName;
+  /*package*/ final AbstractProject project;
   /*package*/ final TreeSet<Integer> buildNumbers;
 
   public SubResult(String projectName) {
     this.projectName = projectName;
+    this.project = (AbstractProject) Hudson.getInstance().getItemMap().get(projectName);
     this.buildNumbers = Sets.<Integer>newTreeSet();
   }
 
   public String getProjectName() {
     return this.projectName;
+  }
+
+  public AbstractProject getProject() {
+    return this.project;
   }
 
   public void addBuildNumber(int buildNumber) {
@@ -54,7 +62,10 @@ import java.util.TreeSet;
     while (it.hasNext()) {
       int buildNumber = it.next();
       AbstractBuild build = buildFinder
-          .findBuild(getProjectName(), buildNumber);
+        .findBuild(getProjectName(), buildNumber);
+      if (build == null) {
+        build = findBuild(buildNumber);
+      }
       if (build != null) {
         result = build.getResult();
         if (result != Result.NOT_BUILT) {
@@ -65,5 +76,12 @@ import java.util.TreeSet;
 
     return result;
   }
-}
 
+  private AbstractBuild findBuild(int buildNumber) {
+    if (getProject() != null) {
+      return buildFinder.findBuild(getProject(), buildNumber);
+    } else {
+      return buildFinder.findBuild(getProjectName(), buildNumber);
+    }
+  }
+}
